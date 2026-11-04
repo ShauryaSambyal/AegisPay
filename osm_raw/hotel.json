@@ -1,0 +1,137 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-04T07:33:51Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 429697565,
+  "lat": 12.9762752,
+  "lon": 77.5767096,
+  "tags": {
+    "name": "Hotel Hindustan",
+    "name:kn": "ಹೊಟೆಲ್ ಹಿಂದುಸ್ಥಾನ",
+    "tourism": "hotel"
+  }
+},
+{
+  "type": "node",
+  "id": 429698095,
+  "lat": 12.9769025,
+  "lon": 77.5763491,
+  "tags": {
+    "addr:city": "Gandhi Nagar, Bangalore",
+    "addr:housenumber": "10",
+    "addr:postcode": "560009",
+    "addr:street": "2nd Cross, 6th Main Road",
+    "name": "Hotel Anand Regency",
+    "phone": "+91-80-41139572",
+    "tourism": "hotel"
+  }
+},
+{
+  "type": "node",
+  "id": 456029958,
+  "lat": 12.9932258,
+  "lon": 77.5717309,
+  "tags": {
+    "addr:street": "Sampige Road",
+    "name": "Sri Krishna Lodge",
+    "tourism": "hotel"
+  }
+},
+{
+  "type": "node",
+  "id": 663683086,
+  "lat": 12.9822391,
+  "lon": 77.5944590,
+  "tags": {
+    "addr:city": "Bangalore",
+    "addr:postcode": "560001",
+    "addr:street": "Raj Bhavan Road",
+    "name": "The Capitol",
+    "tourism": "hotel"
+  }
+},
+{
+  "type": "node",
+  "id": 1005525039,
+  "lat": 12.9804450,
+  "lon": 77.6045250,
+  "tags": {
+    "addr:city": "Bangalore",
+    "addr:housenumber": "66",
+    "addr:postcode": "560001",
+    "addr:street": "Infantry Road",
+    "email": "enquiry@theinfantryhotel.com",
+    "fax": "+918025592276",
+    "internet_access": "yes",
+    "internet_access:fee": "yes",
+    "name": "The Infantry Hotel",
+    "phone": "+918025591800",
+    "tourism": "hotel",
+    "website": "http://www.hotelinfantrycourt.com"
+  }
+},
+{
+  "type": "node",
+  "id": 1006462322,
+  "lat": 12.9809210,
+  "lon": 77.5764910,
+  "tags": {
+    "addr:city": "Gandhi Nagar, Bangalore",
+    "addr:housenumber": "22/4",
+    "addr:postcode": "560009",
+    "addr:street": "Race Course Road",
+    "email": "reservations@hotelmaurya.com",
+    "fax": "+91-80-22256685",
+    "name": "Hotel Maurya",
+    "phone": "+91-80-22254111",
+    "tourism": "hotel",
+    "website": "https://www.hotelmaurya.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 1006492448,
+  "lat": 12.9890960,
+  "lon": 77.5722530,
+  "tags": {
+    "addr:city": "Seshadripuram, Bangalore",
+    "addr:housenumber": "1",
+    "addr:postcode": "560020",
+    "addr:street": "Railway Platform Road",
+    "name": "Hotel Swathi",
+    "name:kn": "ಸ್ವತಿ",
+    "phone": "+91-80-23561123",
+    "tourism": "hotel"
+  }
+},
+{
+  "type": "node",
+  "id": 1026441566,
+  "lat": 12.9850452,
+  "lon": 77.5792480,
+  "tags": {
+    "addr:city": "Bangalore",
+    "addr:housenumber": "2A-2B",
+    "addr:postcode": "560001",
+    "addr:street": "Crescent Road, High Ground",
+    "email": "reservation@nalapadhotels.net",
+    "internet_access": "yes",
+    "internet_access:fee": "yes",
+    "name": "Nalapad's Hotel Bangalore International",
+    "smoking": "dedicated",
+    "stars": "3",
+    "tourism": "hotel",
+    "website": "http://www.nalapad.com",
+    "wheelchair": "no"
+  }
+}
+
+  ]
+}

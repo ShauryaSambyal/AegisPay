@@ -1,0 +1,793 @@
+{
+  "generatedAt": "2026-11-04T07:57:19.590555+00:00",
+  "bbox": "12.93,77.56,13.02,77.65",
+  "city": "Bengaluru",
+  "state": "Karnataka",
+  "source": "OpenStreetMap / Overpass API",
+  "totalElements": 60,
+  "categories": {
+    "bakery": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 343089650,
+          "lat": 12.9915471,
+          "lon": 77.614181,
+          "tags": {
+            "addr:housenumber": "# 1/2",
+            "addr:postcode": "560005",
+            "addr:street": "Wheeler Road",
+            "name": "Thom's Bakery",
+            "name:ar": "دكان كبير",
+            "name:kn": "ಥಾಮ್ಸ್ ಬೇಕರಿ",
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 428457212,
+          "lat": 12.9697383,
+          "lon": 77.6003775,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:country": "IN",
+            "addr:hamlet": "Shanthala Nagar",
+            "addr:housename": "Sophia's Choice",
+            "addr:postcode": "560001",
+            "addr:street": "Saint Mark's Road",
+            "amenity": "cafe",
+            "delivery": "yes",
+            "name": "Old Madras Baking Company",
+            "opening_hours": "08:00-23:00",
+            "operator": "Old Madras Baking Company",
+            "shop": "bakery",
+            "takeaway": "yes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 621310418,
+          "lat": 13.0002063,
+          "lon": 77.5697663,
+          "tags": {
+            "name": "Baker's Hut",
+            "name:kn": "ಬೇಕರ್ಸ್ ಹಟ್",
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1290107596,
+          "lat": 13.0075028,
+          "lon": 77.5635659,
+          "tags": {
+            "name": "Bun World",
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1290203366,
+          "lat": 13.0011038,
+          "lon": 77.5723003,
+          "tags": {
+            "name": "Iyengar's Bakery",
+            "name:kn": "ಐಯ್ಯಂಗಾರ್ ಬೇಕರಿ",
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1420066677,
+          "lat": 12.964528,
+          "lon": 77.6396738,
+          "tags": {
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1420105905,
+          "lat": 12.9724613,
+          "lon": 77.6391823,
+          "tags": {
+            "name": "Daily Bread",
+            "shop": "bakery"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1455123611,
+          "lat": 12.9354419,
+          "lon": 77.6141569,
+          "tags": {
+            "name": "Sree Mittai",
+            "shop": "bakery"
+          }
+        }
+      ]
+    },
+    "restaurant": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 306585721,
+          "lat": 12.9333646,
+          "lon": 77.6230728,
+          "tags": {
+            "addr:street": "Mahayogi Vemana Road",
+            "amenity": "restaurant",
+            "name": "Sukh Sagar",
+            "name:kn": "ಸುಖ್ ಸಾಗರ"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312503506,
+          "lat": 12.9606568,
+          "lon": 77.6385011,
+          "tags": {
+            "amenity": "restaurant",
+            "check_date": "2026-06-06",
+            "food": "veg",
+            "name": "Crazy Boys",
+            "name:kn": "ಶಾಂತಿ ಸಾಗರ"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312508904,
+          "lat": 12.9619513,
+          "lon": 77.6419064,
+          "tags": {
+            "addr:street": "100 Feet Road",
+            "amenity": "restaurant",
+            "name": "Nandhini",
+            "name:kn": "ನಂದಿನಿ",
+            "wheelchair": "no"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312595492,
+          "lat": 12.9558995,
+          "lon": 77.6411692,
+          "tags": {
+            "amenity": "restaurant",
+            "name": "Nandhana",
+            "name:kn": "ನಂದನ"
+          }
+        },
+        {
+          "type": "node",
+          "id": 314705276,
+          "lat": 12.9741824,
+          "lon": 77.5753745,
+          "tags": {
+            "amenity": "restaurant",
+            "name": "Sukh Sagar",
+            "name:kn": "ಸುಖ್ ಸಾಗರ"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316999234,
+          "lat": 12.9651393,
+          "lon": 77.6383211,
+          "tags": {
+            "addr:street": "Paramahansa Yogananda Road",
+            "amenity": "restaurant",
+            "name": "Simply Native"
+          }
+        },
+        {
+          "type": "node",
+          "id": 317119985,
+          "lat": 12.9543746,
+          "lon": 77.5930172,
+          "tags": {
+            "amenity": "restaurant",
+            "brand": "Adyar Ananda Bhavan",
+            "brand:wikidata": "Q15178238",
+            "changing_table:fee": "yes",
+            "check_date": "2026-09-24",
+            "level": "0",
+            "name": "Adyar Ananda Bhavan",
+            "name:kn": "ಕದಂಬ ವೆಜ್",
+            "opening_hours": "PH,Mo-Su 07:00-22:30",
+            "shop": "confectionery",
+            "short_name": "A2B",
+            "survey:date": "2024-02-01"
+          }
+        },
+        {
+          "type": "node",
+          "id": 349291886,
+          "lat": 12.9756318,
+          "lon": 77.6014761,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:country": "IN",
+            "addr:housenumber": "39",
+            "addr:postcode": "560001",
+            "addr:street": "Saint Mark's Road",
+            "addr:suburb": "Shanthala Nagar",
+            "amenity": "restaurant",
+            "capacity": "125",
+            "check_date": "2024-08-19",
+            "delivery": "no",
+            "name": "Koshy's",
+            "name:kn": "ಕೋಶೀಸ್",
+            "official_name": "Koshy's Parade Cafe",
+            "opening_hours": "09:00 - 23:00",
+            "smoking": "no",
+            "start_date": "1952",
+            "takeaway": "yes",
+            "wheelchair": "limited",
+            "wikidata": "Q6433165"
+          }
+        }
+      ]
+    },
+    "grocery": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 307411444,
+          "lat": 12.9328185,
+          "lon": 77.5830433,
+          "tags": {
+            "name": "Foodworld",
+            "name:kn": "ಫುಡ್ ವರ್ಲ್ಡ್",
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312504711,
+          "lat": 12.9588137,
+          "lon": 77.6382484,
+          "tags": {
+            "name": "Family Mall",
+            "opening_hours": "Mo-Su,PH 08:00-22:00",
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312504777,
+          "lat": 12.9591813,
+          "lon": 77.6382984,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:postcode": "560071",
+            "addr:street": "7th Cross Road",
+            "name": "Spencers Express",
+            "organic": "yes",
+            "shop": "supermarket",
+            "website": "https://www.spencers.in/"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312504798,
+          "lat": 12.9595527,
+          "lon": 77.638381,
+          "tags": {
+            "brand": "More",
+            "brand:wikidata": "Q6910891",
+            "name": "More",
+            "name:kn": "ಮೋರ್",
+            "opening_hours": "Mo-Su,PH 09:00-21:00",
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 312506295,
+          "lat": 12.9621752,
+          "lon": 77.6373877,
+          "tags": {
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 571124364,
+          "lat": 13.0042882,
+          "lon": 77.5710889,
+          "tags": {
+            "addr:street": "Sampige Road",
+            "brand": "Reliance Fresh",
+            "brand:wikidata": "Q7311014",
+            "brand:wikipedia": "en:Reliance Fresh",
+            "name": "Reliance Fresh",
+            "name:kn": "ರಿಲಾಯನ್ಸ್ ಫ್ರೆಶ್",
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 574499845,
+          "lat": 13.0061977,
+          "lon": 77.5693737,
+          "tags": {
+            "branch": "Malleshwaram",
+            "check_date": "2025-08-09",
+            "name": "Reliance smart",
+            "shop": "supermarket"
+          }
+        },
+        {
+          "type": "node",
+          "id": 599205803,
+          "lat": 13.0068052,
+          "lon": 77.5645334,
+          "tags": {
+            "brand": "Reliance Fresh",
+            "brand:wikidata": "Q7311014",
+            "name": "Reliance Fresh",
+            "name:kn": "ರಿಲಾಯನ್ಸ್ ಫ್ರೆಶ್",
+            "shop": "supermarket"
+          }
+        }
+      ]
+    },
+    "pharmacy": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 307413315,
+          "lat": 12.9314045,
+          "lon": 77.5924636,
+          "tags": {
+            "amenity": "pharmacy",
+            "healthcare": "pharmacy"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316995046,
+          "lat": 12.9600171,
+          "lon": 77.6454021,
+          "tags": {
+            "addr:street": "HAL Airport Road",
+            "amenity": "pharmacy",
+            "name": "Ashwin Pharma"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316996472,
+          "lat": 12.9600511,
+          "lon": 77.6371358,
+          "tags": {
+            "amenity": "pharmacy",
+            "created_by": "Potlatch 0.10f"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316996475,
+          "lat": 12.9586589,
+          "lon": 77.6375328,
+          "tags": {
+            "amenity": "pharmacy",
+            "created_by": "Potlatch 0.10f"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316996550,
+          "lat": 12.9581727,
+          "lon": 77.6402029,
+          "tags": {
+            "amenity": "pharmacy"
+          }
+        },
+        {
+          "type": "node",
+          "id": 316999477,
+          "lat": 12.9686175,
+          "lon": 77.6489441,
+          "tags": {
+            "amenity": "pharmacy",
+            "brand": "Apollo Pharmacy",
+            "brand:wikidata": "Q62562612",
+            "healthcare": "pharmacy",
+            "name": "Apollo Pharmacy",
+            "name:kn": "ಅಪೊಲೋ ಫಾರ್ಮಸಿ"
+          }
+        },
+        {
+          "type": "node",
+          "id": 454142399,
+          "lat": 13.0183245,
+          "lon": 77.6364269,
+          "tags": {
+            "amenity": "pharmacy",
+            "dispensing": "yes",
+            "name": "Sathya Medicals"
+          }
+        },
+        {
+          "type": "node",
+          "id": 617760063,
+          "lat": 13.0006252,
+          "lon": 77.5652425,
+          "tags": {
+            "addr:city": "Malleswaram, Bangalore",
+            "addr:street": "8th Main",
+            "amenity": "pharmacy",
+            "name": "Pushyamee"
+          }
+        }
+      ]
+    },
+    "electronics": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 1589557488,
+          "lat": 12.9647793,
+          "lon": 77.5836994,
+          "tags": {
+            "name": "Om Electronics",
+            "shop": "electronics"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1685654244,
+          "lat": 12.9417196,
+          "lon": 77.5853932,
+          "tags": {
+            "name": "Girias Electronics",
+            "shop": "electronics"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1725164124,
+          "lat": 12.9759517,
+          "lon": 77.6147731,
+          "tags": {
+            "name": "Panasonic",
+            "shop": "electronics"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1824167359,
+          "lat": 12.9738948,
+          "lon": 77.5785146,
+          "tags": {
+            "name": "Univer Cell",
+            "note": "Mobile shop",
+            "shop": "electronics",
+            "wheelchair": "no"
+          }
+        },
+        {
+          "type": "node",
+          "id": 3370003812,
+          "lat": 12.9783847,
+          "lon": 77.6366104,
+          "tags": {
+            "name": "Famous Electronics",
+            "shop": "electronics"
+          }
+        },
+        {
+          "type": "node",
+          "id": 3370028970,
+          "lat": 12.9784108,
+          "lon": 77.6370964,
+          "tags": {
+            "branch": "Mobile Store",
+            "brand": "Samsung",
+            "brand:wikidata": "Q20718",
+            "name": "Samsung",
+            "shop": "electronics"
+          }
+        }
+      ]
+    },
+    "clothing": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 454141780,
+          "lat": 13.019526,
+          "lon": 77.6367557,
+          "tags": {
+            "name": "Sansar Collections",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 456214161,
+          "lat": 12.9735992,
+          "lon": 77.5803131,
+          "tags": {
+            "name": "Kids Kemp",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 677286824,
+          "lat": 12.9554112,
+          "lon": 77.5918509,
+          "tags": {
+            "addr:street": "KH Road (Double Road)",
+            "name": "Mysore Resham Emporium",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 677286837,
+          "lat": 12.9710106,
+          "lon": 77.598276,
+          "tags": {
+            "addr:street": "Lavelle Road",
+            "brand": "Levi's",
+            "brand:wikidata": "Q127962",
+            "clothes": "denim;men;women",
+            "name": "Levi's",
+            "name:kn": "ಲೆವಿಸ್",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 677286838,
+          "lat": 12.9708747,
+          "lon": 77.5990041,
+          "tags": {
+            "addr:street": "Lavelle Road",
+            "name": "Espirit",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 677286840,
+          "lat": 12.9707183,
+          "lon": 77.6005293,
+          "tags": {
+            "addr:street": "Saint Mark's Road",
+            "name": "Giovani",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1121253486,
+          "lat": 12.9834716,
+          "lon": 77.5856742,
+          "tags": {
+            "branch": "Showroom",
+            "brand": "Nike",
+            "brand:wikidata": "Q483915",
+            "name": "Nike",
+            "shop": "clothes"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1138469390,
+          "lat": 12.9787173,
+          "lon": 77.643786,
+          "tags": {
+            "addr:street": "Chinmaya Mission Hospital Road",
+            "name": "Bandhej",
+            "shop": "clothes"
+          }
+        }
+      ]
+    },
+    "hotel": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 429697565,
+          "lat": 12.9762752,
+          "lon": 77.5767096,
+          "tags": {
+            "name": "Hotel Hindustan",
+            "name:kn": "ಹೊಟೆಲ್ ಹಿಂದುಸ್ಥಾನ",
+            "tourism": "hotel"
+          }
+        },
+        {
+          "type": "node",
+          "id": 429698095,
+          "lat": 12.9769025,
+          "lon": 77.5763491,
+          "tags": {
+            "addr:city": "Gandhi Nagar, Bangalore",
+            "addr:housenumber": "10",
+            "addr:postcode": "560009",
+            "addr:street": "2nd Cross, 6th Main Road",
+            "name": "Hotel Anand Regency",
+            "phone": "+91-80-41139572",
+            "tourism": "hotel"
+          }
+        },
+        {
+          "type": "node",
+          "id": 456029958,
+          "lat": 12.9932258,
+          "lon": 77.5717309,
+          "tags": {
+            "addr:street": "Sampige Road",
+            "name": "Sri Krishna Lodge",
+            "tourism": "hotel"
+          }
+        },
+        {
+          "type": "node",
+          "id": 663683086,
+          "lat": 12.9822391,
+          "lon": 77.594459,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:postcode": "560001",
+            "addr:street": "Raj Bhavan Road",
+            "name": "The Capitol",
+            "tourism": "hotel"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1005525039,
+          "lat": 12.980445,
+          "lon": 77.604525,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:housenumber": "66",
+            "addr:postcode": "560001",
+            "addr:street": "Infantry Road",
+            "email": "enquiry@theinfantryhotel.com",
+            "fax": "+918025592276",
+            "internet_access": "yes",
+            "internet_access:fee": "yes",
+            "name": "The Infantry Hotel",
+            "phone": "+918025591800",
+            "tourism": "hotel",
+            "website": "http://www.hotelinfantrycourt.com"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1006462322,
+          "lat": 12.980921,
+          "lon": 77.576491,
+          "tags": {
+            "addr:city": "Gandhi Nagar, Bangalore",
+            "addr:housenumber": "22/4",
+            "addr:postcode": "560009",
+            "addr:street": "Race Course Road",
+            "email": "reservations@hotelmaurya.com",
+            "fax": "+91-80-22256685",
+            "name": "Hotel Maurya",
+            "phone": "+91-80-22254111",
+            "tourism": "hotel",
+            "website": "https://www.hotelmaurya.com/"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1006492448,
+          "lat": 12.989096,
+          "lon": 77.572253,
+          "tags": {
+            "addr:city": "Seshadripuram, Bangalore",
+            "addr:housenumber": "1",
+            "addr:postcode": "560020",
+            "addr:street": "Railway Platform Road",
+            "name": "Hotel Swathi",
+            "name:kn": "ಸ್ವತಿ",
+            "phone": "+91-80-23561123",
+            "tourism": "hotel"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1026441566,
+          "lat": 12.9850452,
+          "lon": 77.579248,
+          "tags": {
+            "addr:city": "Bangalore",
+            "addr:housenumber": "2A-2B",
+            "addr:postcode": "560001",
+            "addr:street": "Crescent Road, High Ground",
+            "email": "reservation@nalapadhotels.net",
+            "internet_access": "yes",
+            "internet_access:fee": "yes",
+            "name": "Nalapad's Hotel Bangalore International",
+            "smoking": "dedicated",
+            "stars": "3",
+            "tourism": "hotel",
+            "website": "http://www.nalapad.com",
+            "wheelchair": "no"
+          }
+        }
+      ]
+    },
+    "convenience": {
+      "elements": [
+        {
+          "type": "node",
+          "id": 574254132,
+          "lat": 13.00559,
+          "lon": 77.570496,
+          "tags": {
+            "name": "HOPCOMS",
+            "name:kn": "ಹಾಪ್ ಕಾಮ್ಸ್",
+            "operator": "milk store",
+            "shop": "convenience"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1465777960,
+          "lat": 12.9418577,
+          "lon": 77.6159961,
+          "tags": {
+            "addr:postcode": "560095",
+            "addr:street": "Adugodi main road",
+            "name": "Forum bakery",
+            "shop": "convenience"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1614268199,
+          "lat": 12.9867564,
+          "lon": 77.5795592,
+          "tags": {
+            "addr:housename": "Shivananda General Stores Complex",
+            "addr:street": "Kumarakripa East",
+            "name": "Shivananda Stores",
+            "shop": "convenience"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1851701331,
+          "lat": 12.9583088,
+          "lon": 77.6022126,
+          "tags": {
+            "name": "Neelam Stores",
+            "shop": "convenience"
+          }
+        },
+        {
+          "type": "node",
+          "id": 1866331129,
+          "lat": 13.0039638,
+          "lon": 77.6155248,
+          "tags": {
+            "name": "Mysore Mini Shopee",
+            "shop": "convenience"
+          }
+        },
+        {
+          "type": "node",
+          "id": 3369906181,
+          "lat": 12.9812255,
+          "lon": 77.6368206,
+          "tags": {
+            "name": "Time Pass",
+            "name:kn": "ಟೈಂ ಪಾಸ್",
+            "shop": "convenience"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-04T07:33:51Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 454141780,
+  "lat": 13.0195260,
+  "lon": 77.6367557,
+  "tags": {
+    "name": "Sansar Collections",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 456214161,
+  "lat": 12.9735992,
+  "lon": 77.5803131,
+  "tags": {
+    "name": "Kids Kemp",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 677286824,
+  "lat": 12.9554112,
+  "lon": 77.5918509,
+  "tags": {
+    "addr:street": "KH Road (Double Road)",
+    "name": "Mysore Resham Emporium",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 677286837,
+  "lat": 12.9710106,
+  "lon": 77.5982760,
+  "tags": {
+    "addr:street": "Lavelle Road",
+    "brand": "Levi's",
+    "brand:wikidata": "Q127962",
+    "clothes": "denim;men;women",
+    "name": "Levi's",
+    "name:kn": "ಲೆವಿಸ್",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 677286838,
+  "lat": 12.9708747,
+  "lon": 77.5990041,
+  "tags": {
+    "addr:street": "Lavelle Road",
+    "name": "Espirit",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 677286840,
+  "lat": 12.9707183,
+  "lon": 77.6005293,
+  "tags": {
+    "addr:street": "Saint Mark's Road",
+    "name": "Giovani",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 1121253486,
+  "lat": 12.9834716,
+  "lon": 77.5856742,
+  "tags": {
+    "branch": "Showroom",
+    "brand": "Nike",
+    "brand:wikidata": "Q483915",
+    "name": "Nike",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 1138469390,
+  "lat": 12.9787173,
+  "lon": 77.6437860,
+  "tags": {
+    "addr:street": "Chinmaya Mission Hospital Road",
+    "name": "Bandhej",
+    "shop": "clothes"
+  }
+}
+
+  ]
+}

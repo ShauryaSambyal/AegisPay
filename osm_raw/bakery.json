@@ -1,0 +1,109 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-04T07:31:43Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 343089650,
+  "lat": 12.9915471,
+  "lon": 77.6141810,
+  "tags": {
+    "addr:housenumber": "# 1/2",
+    "addr:postcode": "560005",
+    "addr:street": "Wheeler Road",
+    "name": "Thom's Bakery",
+    "name:ar": "دكان كبير",
+    "name:kn": "ಥಾಮ್ಸ್ ಬೇಕರಿ",
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 428457212,
+  "lat": 12.9697383,
+  "lon": 77.6003775,
+  "tags": {
+    "addr:city": "Bangalore",
+    "addr:country": "IN",
+    "addr:hamlet": "Shanthala Nagar",
+    "addr:housename": "Sophia's Choice",
+    "addr:postcode": "560001",
+    "addr:street": "Saint Mark's Road",
+    "amenity": "cafe",
+    "delivery": "yes",
+    "name": "Old Madras Baking Company",
+    "opening_hours": "08:00-23:00",
+    "operator": "Old Madras Baking Company",
+    "shop": "bakery",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 621310418,
+  "lat": 13.0002063,
+  "lon": 77.5697663,
+  "tags": {
+    "name": "Baker's Hut",
+    "name:kn": "ಬೇಕರ್ಸ್ ಹಟ್",
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 1290107596,
+  "lat": 13.0075028,
+  "lon": 77.5635659,
+  "tags": {
+    "name": "Bun World",
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 1290203366,
+  "lat": 13.0011038,
+  "lon": 77.5723003,
+  "tags": {
+    "name": "Iyengar's Bakery",
+    "name:kn": "ಐಯ್ಯಂಗಾರ್ ಬೇಕರಿ",
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 1420066677,
+  "lat": 12.9645280,
+  "lon": 77.6396738,
+  "tags": {
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 1420105905,
+  "lat": 12.9724613,
+  "lon": 77.6391823,
+  "tags": {
+    "name": "Daily Bread",
+    "shop": "bakery"
+  }
+},
+{
+  "type": "node",
+  "id": 1455123611,
+  "lat": 12.9354419,
+  "lon": 77.6141569,
+  "tags": {
+    "name": "Sree Mittai",
+    "shop": "bakery"
+  }
+}
+
+  ]
+}
