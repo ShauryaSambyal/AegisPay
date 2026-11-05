@@ -781,3 +781,21 @@ Exit code: 0
 ### 2. Pre-Commit Verifications
 - `.venv/`, `node_modules/`, `ml-service/data/external/`, `ml-service/datasets/`, `ml-service/legacy/`, `.log` files, and `artifacts/model.joblib` are confirmed ignored.
 - No unintended large binaries in git staging area.
+
+### 3. Git Commits and Push
+Commits:
+- `690291d` `feat(osm): normalize Bengaluru shops and add cafes`
+- `5bef9f1` `refactor(data): separate real OSM identities from simulated risk`
+- `4c52f5c` `feat(ml): add risk scoring service and model artifacts`
+- `265e54f` `docs: replace unverified claims with validation status`
+
+Push:
+```powershell
+git push origin main
+# To https://github.com/ShauryaSambyal/AegisPay.git
+#    cbd540f..265e54f  main -> main
+```
+`git status -sb` clean (`## main...origin/main`), `git log origin/main..HEAD` is empty.
+
+### Phase 9 Acceptance Status: PASSED
+All verifications, smoke tests, clean commits, and push completed successfully.
