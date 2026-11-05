@@ -31,3 +31,16 @@ Thumbs.db
 # Runtime uploads / temp data
 tmp/
 temp/
+
+# Python & ML Service
+.venv/
+ml-service/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+ml-service/data/external/
+ml-service/datasets/
+ml-service/legacy/
+ml-service/artifacts/model.joblib
+ml-service/artifacts/*.pkl
+ml-service/artifacts/figures/

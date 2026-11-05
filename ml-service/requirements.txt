@@ -1,0 +1,33 @@
+# AegisPay Sentinel ML service — pinned to the verified Python 3.11.9 venv.
+# Recreate with:
+#   py -3.11 -m venv ml-service\.venv
+#   .\ml-service\.venv\Scripts\python.exe -m pip install -r ml-service\requirements.txt
+# Verify with:
+#   .\ml-service\.venv\Scripts\python.exe ml-service\scripts\check_env.py
+#   .\ml-service\.venv\Scripts\python.exe -m pip check
+#
+# Every pin below is the version actually installed (see docs/EXECUTION_LOG.md,
+# "Phase 1"). test-only packages are marked but kept in this single file so the
+# environment is reproducible with one command.
+
+# --- Web service ---
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.2
+starlette==1.10.0
+
+# --- Data / ML ---
+numpy==2.4.6
+pandas==3.1.1
+scikit-learn==1.9.1
+xgboost==3.1.3
+shap==0.51.0
+statsmodels==0.15.0
+joblib==1.6.0
+matplotlib==3.11.2
+networkx==3.6.1
+pyarrow==26.0.1
+
+# --- Test-only (used by ml-service/tests and scripts/check_env.py) ---
+pytest==9.2.0
+httpx==0.28.1

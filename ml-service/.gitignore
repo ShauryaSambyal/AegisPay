@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Downloaded external datasets (never redistributed from this repo)
+data/external/
+
+# Vendored research datasets kept locally only (tests/data pull them on demand)
+datasets/
+
+# Legacy exploratory work kept on disk but out of the shipped tree
+legacy/
+
+# Generated binary model artifacts. metrics.json, model_card.json and
+# feature_importance.json ARE committed; the joblib bundle is regenerable.
+artifacts/model.joblib
+artifacts/*.pkl
+artifacts/figures/
+
+# Local logs
+*.log

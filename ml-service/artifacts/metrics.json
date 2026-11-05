@@ -1,0 +1,114 @@
+{
+  "generatedAt": "2026-11-05T11:18:47.125956+00:00",
+  "seed": 20261104,
+  "modelVersion": "1.0.0",
+  "model": "HistGradientBoostingClassifier",
+  "calibration": "isotonic",
+  "windowDays": 3,
+  "trainMerchants": [
+    "SIM-0001",
+    "SIM-0002",
+    "SIM-0004",
+    "SIM-0005",
+    "SIM-0006",
+    "SIM-0007",
+    "SIM-0011",
+    "SIM-0012",
+    "SIM-0013",
+    "SIM-0014"
+  ],
+  "holdoutMerchants": [
+    "SIM-0003",
+    "SIM-0008",
+    "SIM-0009",
+    "SIM-0010"
+  ],
+  "temporalCutoffWindowSeq": 22,
+  "splits": {
+    "train": {
+      "n": 220,
+      "positives": 12,
+      "merchants": [
+        "SIM-0001",
+        "SIM-0002",
+        "SIM-0004",
+        "SIM-0005",
+        "SIM-0006",
+        "SIM-0007",
+        "SIM-0011",
+        "SIM-0012",
+        "SIM-0013",
+        "SIM-0014"
+      ],
+      "windows": [
+        0,
+        21
+      ]
+    },
+    "time_holdout": {
+      "n": 80,
+      "positives": 24,
+      "threshold": 0.05,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          56,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "notes": [],
+      "name": "time_holdout",
+      "merchants": [
+        "SIM-0001",
+        "SIM-0002",
+        "SIM-0004",
+        "SIM-0005",
+        "SIM-0006",
+        "SIM-0007",
+        "SIM-0011",
+        "SIM-0012",
+        "SIM-0013",
+        "SIM-0014"
+      ]
+    },
+    "merchant_holdout": {
+      "n": 120,
+      "positives": 12,
+      "threshold": 0.05,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          108,
+          0
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "notes": [],
+      "name": "merchant_holdout",
+      "merchants": [
+        "SIM-0003",
+        "SIM-0008",
+        "SIM-0009",
+        "SIM-0010"
+      ]
+    }
+  },
+  "operatingThreshold": 0.05,
+  "syntheticEvaluation": true,
+  "caveat": "All metrics are measured on synthetic simulated windows. They describe how well the pipeline separates injected typologies from the simulated normal population, not real-world betting-front detection performance."
+}

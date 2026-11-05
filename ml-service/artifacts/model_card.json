@@ -1,0 +1,136 @@
+{
+  "name": "AegisPay Sentinel merchant risk model",
+  "version": "1.0.0",
+  "trainedAt": "2026-11-05T11:18:52.861427+00:00",
+  "seed": 20261104,
+  "modelType": "HistGradientBoostingClassifier",
+  "calibration": "isotonic",
+  "featureNames": [
+    "avg_amount_log",
+    "amount_cv",
+    "p90_amount_log",
+    "round_amount_ratio",
+    "night_share",
+    "hour_entropy",
+    "burst_sync_ratio",
+    "benford_divergence",
+    "geo_entropy",
+    "out_of_state_share",
+    "payer_repeat_ratio",
+    "payer_churn_entropy",
+    "category_drift_js",
+    "amount_mad_z",
+    "night_mad_z",
+    "round_mad_z",
+    "graph_degree",
+    "graph_cycle_member",
+    "graph_shared_payer_overlap",
+    "graph_component_size"
+  ],
+  "featureCount": 20,
+  "windowDays": 3,
+  "trainingData": {
+    "primary": "Deterministic simulated SIM-* transactions (src/data.py)",
+    "auxiliary": "coffee_shop_transactions.csv basket composition for café amounts (assumed unit prices)",
+    "externalDatasetsUsedForTraining": [],
+    "externalDatasetsInspected": [
+      "AMLSim",
+      "PaySim",
+      "BankSim",
+      "MoMTSim",
+      "coffee_shop_transactions.csv",
+      "AegisPay simulated world"
+    ],
+    "provenance": "synthetic",
+    "realOsmRecordsUsed": false
+  },
+  "datasetSummary": {
+    "transactions": 15537,
+    "merchants": 14,
+    "windowRows": 420,
+    "featureRows": 420,
+    "positives": 48,
+    "negatives": 372,
+    "injectionDay": 55,
+    "observationDays": 90,
+    "windowDays": 3,
+    "allMerchantsSimulated": true,
+    "labelSource": "scenario parameters (normal|drift|syndicate) + fixed injection day"
+  },
+  "metrics": {
+    "timeHoldout": {
+      "n": 80,
+      "positives": 24,
+      "threshold": 0.05,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          56,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "notes": [],
+      "name": "time_holdout",
+      "merchants": [
+        "SIM-0001",
+        "SIM-0002",
+        "SIM-0004",
+        "SIM-0005",
+        "SIM-0006",
+        "SIM-0007",
+        "SIM-0011",
+        "SIM-0012",
+        "SIM-0013",
+        "SIM-0014"
+      ]
+    },
+    "merchantHoldout": {
+      "n": 120,
+      "positives": 12,
+      "threshold": 0.05,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          108,
+          0
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "notes": [],
+      "name": "merchant_holdout",
+      "merchants": [
+        "SIM-0003",
+        "SIM-0008",
+        "SIM-0009",
+        "SIM-0010"
+      ]
+    },
+    "operatingThreshold": 0.05
+  },
+  "evaluation": "synthetic_evaluation",
+  "syntheticDataWarning": "Metrics are computed on synthetic simulated windows. They measure separation of injected typologies from the simulated normal population and must not be read as real-world detection accuracy.",
+  "limitations": [
+    "Trained and evaluated entirely on synthetic SIM-* data; no real fraud or betting labels were used.",
+    "Merchant holdout slices can contain too few positive windows for a stable AUC; such metrics are reported as null.",
+    "The rule layer and the graph layer share simulated payer identifiers, so their signal is cleaner than production payment data.",
+    "No production calibration: the operating threshold is derived from the training slice (75th percentile of scores).",
+    "Real OpenStreetMap businesses are never scored by this model."
+  ],
+  "intendedUse": "Research/demo triage assistance inside the AegisPay Sentinel demo environment.",
+  "outOfScopeUse": "Legal findings, regulatory filings, or automated adverse action against any real merchant."
+}
