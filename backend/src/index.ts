@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import merchantsRouter from './routes/merchants.js';
 import transactionsRouter from './routes/transactions.js';
 import simulatorRouter from './routes/simulator.js';
@@ -56,6 +59,28 @@ app.get('/api/health', (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Serve frontend static build in production if available
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistCandidates = [
+  path.resolve(process.cwd(), 'frontend/dist'),
+  path.resolve(process.cwd(), '../frontend/dist'),
+  path.resolve(__dirname, '../../frontend/dist'),
+  path.resolve(__dirname, '../frontend/dist'),
+];
+const frontendDist = frontendDistCandidates.find(dir => fs.existsSync(dir));
+
+if (frontendDist) {
+  console.log(`[AegisPay Sentinel] Serving frontend static assets from: ${frontendDist}`);
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 app.use((_req, res) => {
   sendError(res, 404, 'ROUTE_NOT_FOUND', 'No route matches this request');

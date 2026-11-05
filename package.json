@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "node run-all.js",
     "start": "node run-all.js",
+    "start:prod": "node backend/dist/index.js",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "build:backend": "npm run build --prefix backend",
     "build:frontend": "npm run build --prefix frontend",
-    "build": "npm run build --prefix backend && npm run build --prefix frontend"
+    "build": "npm install --prefix backend && npm run build --prefix backend && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "keywords": [
     "payu",

@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+.git
+.github
+ml-service/.venv
+ml-service/__pycache__
+*.pyc
+osm_raw
+dist
+**/dist
+.env
+**/.env
