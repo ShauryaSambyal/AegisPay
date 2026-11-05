@@ -14,6 +14,7 @@ import path from 'node:path';
 export type OsmCategoryKey =
   | 'bakery'
   | 'restaurant'
+  | 'cafe'
   | 'grocery'
   | 'pharmacy'
   | 'electronics'
@@ -103,6 +104,17 @@ export const OSM_CATEGORIES: OsmCategoryConfig[] = [
     businessType: 'Restaurant',
   },
   {
+    // MCC 5814 covers Fast Food Restaurants, Coffee Shops, and Snack Bars.
+    // In ISO 18245 / card scheme classification, amenity=cafe maps to MCC 5814
+    // (distinct from MCC 5812 sit-down eating places or retail grocery).
+    key: 'cafe',
+    label: 'Café',
+    overpassFilter: 'node[amenity=cafe]',
+    mcc: '5814',
+    mccDescription: 'Cafés, Coffee Shops & Fast Food',
+    businessType: 'Café',
+  },
+  {
     key: 'grocery',
     label: 'Grocery Store',
     overpassFilter: 'node[shop=supermarket]',
@@ -175,10 +187,10 @@ export class OsmService {
   public static getConfig() {
     return {
       endpoints: this.getEndpoints(),
-      bbox: env('OSM_BBOX', '12.93,77.56,13.02,77.65'),
+      bbox: env('OSM_BBOX', '12.90,77.50,13.05,77.70'),
       city: env('OSM_CITY', 'Bengaluru'),
       state: env('OSM_STATE', 'Karnataka'),
-      maxPerCategory: envInt('OSM_MAX_PER_CATEGORY', 8),
+      maxPerCategory: envInt('OSM_MAX_PER_CATEGORY', 50),
       timeoutSeconds: envInt('OVERPASS_TIMEOUT_SECONDS', 45),
       maxRetries: envInt('OVERPASS_MAX_RETRIES', 3),
       cacheTtlMinutes: envInt('OSM_CACHE_TTL_MINUTES', 720),
@@ -484,7 +496,7 @@ export class OsmService {
       generatedAt: new Date().toISOString(),
       city: env('OSM_CITY', 'Bengaluru'),
       state: env('OSM_STATE', 'Karnataka'),
-      bbox: env('OSM_BBOX', '12.93,77.56,13.02,77.65'),
+      bbox: env('OSM_BBOX', '12.90,77.50,13.05,77.70'),
       source: 'snapshot',
       count: 0,
       shops: [],

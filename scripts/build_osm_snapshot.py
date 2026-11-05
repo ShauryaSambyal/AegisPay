@@ -3,12 +3,17 @@ import json
 import os
 from datetime import datetime, timezone
 
-RAW_DIR = r"D:\Hackathon\osm_raw"
-OUT = r"D:\Hackathon\backend\src\data\osm_raw_snapshot.json"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW_DIR = os.path.join(REPO_ROOT, "osm_raw")
+OUT = os.path.join(REPO_ROOT, "backend", "src", "data", "osm_raw_snapshot.json")
 
+# NOTE: scripts/normalize_osm.py is now the single source of truth for the
+# shipped OSM dataset. This script is kept for merging per-category Overpass
+# responses collected by backend's osm:sync into a raw snapshot.
 CATEGORY_ORDER = [
     "bakery",
     "restaurant",
+    "cafe",
     "grocery",
     "pharmacy",
     "electronics",
@@ -41,7 +46,9 @@ def main() -> None:
         "bbox": "12.93,77.56,13.02,77.65",
         "city": "Bengaluru",
         "state": "Karnataka",
-        "source": "OpenStreetMap / Overpass API",
+        "source": "OpenStreetMap",
+        "license": "ODbL-1.0",
+        "attribution": "© OpenStreetMap contributors",
         "totalElements": total,
         "categories": categories,
     }
