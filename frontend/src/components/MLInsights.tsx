@@ -100,6 +100,18 @@ const PRESETS = [
   },
 ];
 
+export const DECLARED_CATEGORIES = [
+  { value: 'bakery', label: 'Bakery', mcc: 'MCC 5462 · Retail Bakeries & Pastry Shops' },
+  { value: 'cafe', label: 'Café', mcc: 'MCC 5814 · Cafés, Coffee Shops & Fast Food' },
+  { value: 'clothing', label: 'Clothing', mcc: 'MCC 5651 · Family Clothing Stores' },
+  { value: 'convenience', label: 'Convenience Store', mcc: 'MCC 5499 · Miscellaneous Food Stores' },
+  { value: 'electronics', label: 'Electronics', mcc: 'MCC 5732 · Electronics Stores' },
+  { value: 'grocery', label: 'Grocery Store', mcc: 'MCC 5411 · Supermarkets & Groceries' },
+  { value: 'hotel', label: 'Hotel', mcc: 'MCC 7011 · Hotels & Lodging' },
+  { value: 'pharmacy', label: 'Pharmacy', mcc: 'MCC 5912 · Drug Stores & Pharmacies' },
+  { value: 'restaurant', label: 'Restaurant', mcc: 'MCC 5812 · Eating Places & Restaurants' },
+];
+
 export const MLInsights: React.FC<MLInsightsProps> = ({
   simulatedMerchants,
   realMerchants = [],
@@ -113,7 +125,7 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
   const [inputMode, setInputMode] = useState<'catalog' | 'custom'>('custom');
   const [selectedMerchantId, setSelectedMerchantId] = useState<string>(simulatedMerchants[0]?.id ?? '');
   const [customBusinessName, setCustomBusinessName] = useState<string>('Apex Sports & Bet Lounge');
-  const [customCategory, setCustomCategory] = useState<string>('retail');
+  const [customCategory, setCustomCategory] = useState<string>('restaurant');
   const [activePreset, setActivePreset] = useState<string>('betting_front');
 
   // Fine-tuning parameters
@@ -313,15 +325,11 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       onChange={e => setCustomCategory(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-[#14141e] border border-[#2e2e44] text-white text-xs font-mono focus:border-indigo-400 focus:outline-none"
                     >
-                      <option value="retail" className="bg-[#14141e] text-white">General Retail</option>
-                      <option value="restaurant" className="bg-[#14141e] text-white">Restaurant & Bar</option>
-                      <option value="cafe" className="bg-[#14141e] text-white">Cafe & Lounge</option>
-                      <option value="bakery" className="bg-[#14141e] text-white">Bakery</option>
-                      <option value="clothing" className="bg-[#14141e] text-white">Clothing & Textiles</option>
-                      <option value="electronics" className="bg-[#14141e] text-white">Electronics & Gadgets</option>
-                      <option value="grocery" className="bg-[#14141e] text-white">Grocery & Mart</option>
-                      <option value="hotel" className="bg-[#14141e] text-white">Hotel & Lodging</option>
-                      <option value="gaming" className="bg-[#14141e] text-white">Gaming / Digital Services</option>
+                      {DECLARED_CATEGORIES.map(cat => (
+                        <option key={cat.value} value={cat.value} className="bg-[#14141e] text-white">
+                          {cat.label} ({cat.mcc})
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </>
@@ -569,7 +577,10 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                         {score.outcomeLabel || score.outcome || 'PREDICTION COMPLETED'}
                       </h3>
                       <p className="text-xs font-mono opacity-80 mt-1">
-                        Business: <span className="font-bold underline text-white">{score.displayName || score.merchantId}</span> · Category: {score.category}
+                        Business: <span className="font-bold underline text-white">{score.displayName || score.merchantId}</span> · Category:{' '}
+                        <span className="text-white font-medium capitalize">
+                          {DECLARED_CATEGORIES.find(c => c.value === score.category?.toLowerCase())?.label || score.category}
+                        </span>
                       </p>
                     </div>
 
