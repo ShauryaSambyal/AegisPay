@@ -104,7 +104,7 @@ VITE_API_URL=http://localhost:5000
     {
       method: 'GET',
       path: '/api/osm/shops',
-      desc: 'Normalized OSM shops across all eight categories.',
+      desc: 'Normalized real OSM shops across all nine categories (display only, no risk data).',
     },
     {
       method: 'POST',
@@ -113,8 +113,28 @@ VITE_API_URL=http://localhost:5000
     },
     {
       method: 'GET',
-      path: '/api/merchants',
-      desc: 'Merchant records with synthetic risk profiles and tiers.',
+      path: '/api/merchants?origin=real_osm|simulated|all',
+      desc: 'Real OSM identities (display only) and simulated merchants with fictional risk profiles.',
+    },
+    {
+      method: 'GET',
+      path: '/api/risk/merchant/:id',
+      desc: 'Simulated merchants only; a real OSM id returns HTTP 409.',
+    },
+    {
+      method: 'GET',
+      path: '/api/syndicate/graph',
+      desc: 'Simulated SIM-* merchant and infrastructure nodes only.',
+    },
+    {
+      method: 'GET',
+      path: '/api/ml/model/info',
+      desc: 'Measured metrics, provenance and limitations from the FastAPI ML service.',
+    },
+    {
+      method: 'POST',
+      path: '/api/ml/score/transaction',
+      desc: 'Blended rule + model + graph score for one simulated transaction.',
     },
   ];
 

@@ -70,11 +70,11 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                 Autonomous Behavioral Sentinel for Payment Aggregators
               </h1>
               <p className="text-sm sm:text-base text-neutral-300 leading-relaxed">
-                AegisPay Sentinel solves the payment industry&rsquo;s toughest fraud challenge: 
-                <strong className="text-white"> &ldquo;The Bakery That Takes Bets&rdquo;</strong>. 
-                It continuously analyzes operational drift across onboarded merchants to expose covert sports betting 
-                syndicates with <span className="text-emerald-400 font-semibold font-mono">96%+ confidence</span> while guaranteeing 
-                <span className="text-emerald-400 font-semibold font-mono"> 99.4% false-positive immunity</span> for legitimate small businesses experiencing natural seasonal surges.
+                AegisPay Sentinel solves the payment industry&rsquo;s toughest fraud challenge:
+                <strong className="text-white"> &ldquo;The Bakery That Takes Bets&rdquo;</strong>.
+                It continuously analyzes operational drift across simulated merchants to illustrate how covert sports betting
+                syndicates could be exposed. All risk data is synthetic and no detection accuracy is claimed: the model is
+                evaluated on simulated data only, and real-world performance is <span className="text-amber-400 font-semibold font-mono">NOT VALIDATED</span>.
               </p>
             </div>
           </div>
@@ -167,7 +167,7 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                 <div>
                   <h3 className="text-sm font-semibold text-white">4. Payer Retention &amp; Graph Entropy</h3>
                   <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                    Legitimate retail stores retain 35%&ndash;50% repeat local patrons. Betting fronts exhibit 96.4% disposable, single-use wallets routed from anonymous Telegram wagering channels.
+                    In the simulation model, legitimate retail stores retain 35%&ndash;50% repeat patrons, whereas simulated betting fronts exhibit ~95% disposable single-use wallets.
                   </p>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                 <div>
                   <h3 className="text-sm font-semibold text-white">5. Multi-Modal Footprint &amp; Velocity Reconciliation</h3>
                   <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                    Cross-references ongoing transaction velocity (e.g. ₹48.5L/mo vs declared ₹3.5L/mo) against physical footfall proof, online food delivery catalogs, and public customer review activity.
+                    Compares simulated transaction velocity (for example 3.1x the declared onboarding turnover) against the merchant's own adaptive baseline instead of a fixed global threshold.
                   </p>
                 </div>
               </div>
@@ -274,7 +274,7 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                   tab: 'ai-investigator',
                   title: 'Gemini AI Forensic Dossier Generator',
                   icon: Bot,
-                  desc: 'Autonomous agent that generates court-admissible financial intelligence summaries, PMLA 2002 citations, and formatted FIU-IND STR reports with one-click copy.',
+                  desc: 'Generates a simulated investigation note with plain-English evidence, statutory references and next steps. It is a demo artefact: not a legal finding and not a regulatory filing.',
                   action: 'Launch AI Forensic Agent'
                 },
                 {

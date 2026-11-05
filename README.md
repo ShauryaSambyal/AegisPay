@@ -1,373 +1,258 @@
 # AegisPay Sentinel
 
-<div align="center">
+**Merchant purpose-drift detection on synthetic payment data, with real
+OpenStreetMap businesses shown as display-only directory records.**
 
-### Autonomous Behavioral Drift Engine & Shadow Betting Syndicate Detector
-**Developed for the *Follow The Money Innovation Challenge* (IIM Bangalore &times; PayU)**  
-*Problem Statement: **"The Bakery That Takes Bets"** (MCC 5462 Continuous Due Diligence)*
+AegisPay Sentinel is a hackathon prototype for the PayU × IIM Bangalore
+"Follow the Money" challenge. It monitors simulated merchant payment behaviour,
+scores drift against adaptive baselines, blends rule, model and graph evidence
+into a 0–100 risk score, and shows proportionate intervention tiers.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.0.0-61DAFB?logo=react)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.21.2-000000?logo=express)](https://expressjs.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.16-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
-[![Google GenAI SDK](https://img.shields.io/badge/Google_GenAI-Gemini_2.5_Flash-8E75B2?logo=google)](https://aistudio.google.com/)
-[![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-Overpass_API-7EBC6F?logo=openstreetmap)](https://www.openstreetmap.org/)
-
-[Executive Summary](#-executive-summary) &bull;
-[Core Problem](#-the-core-problem-the-bakery-that-takes-bets) &bull;
-[5D Drift Engine](#-the-5-behavioral-drift-dimensions) &bull;
-[Tiered Response](#-proportionate-tiered-response-matrix) &bull;
-[Syndicate Topology](#-mule-syndicate-topology--cross-mcc-smurfing) &bull;
-[Gemini AI Forensic Agent](#-autonomous-gemini-ai-forensic-investigator) &bull;
-[Quick Start](#-quick-start-guide)
-
-</div>
+> **Data honesty notice.** Every risk score, tier, transaction, drift metric,
+> fraud label, syndicate edge and intervention in this project is **synthetic**
+> and attached to an anonymized `SIM-*` merchant with a **fictional name**. The
+> real OpenStreetMap businesses in the directory are real identities used for
+> display only — they carry no risk data anywhere in the system, and that
+> separation is enforced by the type system, the API (HTTP 409) and the UI.
+> See [`docs/CLAIMS.md`](docs/CLAIMS.md) for the validation status of every
+> quantitative claim.
 
 ---
 
-## 📌 Executive Summary
+## Two datasets, never mixed
 
-Every day, payment aggregators onboard thousands of small and medium businesses (SMBs). Merchants register with 100% authentic KYC documents (valid PAN, GSTIN, and municipal shop establishment licenses). However, organized crime rings and unauthorized online sports betting syndicates increasingly exploit these authentic payment rails by **turning legitimate retail storefronts into covert collection mules**.
+| | Real identities | Simulated risk layer |
+| --- | --- | --- |
+| Source | OpenStreetMap (Overpass), Bengaluru bbox `12.93,77.56,13.02,77.65` | `ml-service/src/data.py` + `backend/src/data/simulated_merchants.json` |
+| Count | 360 shops (40 per category, incl. 40 cafés) | 14 merchants |
+| Id format | `OSM-N343089650` | `SIM-0001` |
+| Names | Real business names | Fictional (`Aurora Bakehouse`, `Blue Kettle Cafe`, …) |
+| Risk score / tier / drift | **Never present** | Present |
+| Transactions / syndicate edges | **Never present** | Present (simulated) |
+| API behaviour | `GET /api/risk/merchant/<real id>` → **409** | Scored normally |
+| Licence | ODbL-1.0, © OpenStreetMap contributors | Project-internal synthetic data |
 
-Traditional rule-based fraud detection fails fundamentally because:
-1. **Onboarding KYC is Authentic**: Initial paper verification passes with zero red flags.
-2. **Individual Transactions Appear Benign**: A ₹1,000 or ₹2,500 deposit looks like an everyday retail cake order.
-3. **Aggressive Blanket Freezing Destroys Honest Businesses**: Arbitrary volume-spike freezes during holiday rushes (e.g., Mother's Day, wedding cake pre-orders) cripple merchant cash flow, cause severe brand damage, and spike merchant churn.
+Type-level enforcement:
 
-**AegisPay Sentinel** introduces a **5-Dimensional Behavioral Drift Engine** coupled with a **Proportionate, Tiered Intervention Matrix** and an **Autonomous Gemini AI Forensic Agent**. It detects covert betting syndicates with **96%+ confidence** while safeguarding genuine merchants with a **99.4% false-positive immunity rate**.
-
----
-
-## 🎯 The Core Problem: "The Bakery That Takes Bets"
-
-```
-                         THE TROJAN HORSE MULE ATTACK
-                         
-  [Day 0: Onboarding]      [Day 1 - 90: Incubation]     [Day 90+: Syndicate Activation]
-  Authentic Documents   -> Low-Volume Retail Sales   -> IPL Match Hours (22:30 - 02:00)
-  Valid GST & PAN          Regular local cakes          Nationwide round bets (₹1k - ₹20k)
-  Storefront leased        10-15 daily UPI orders       13.8x volume velocity spike
-  [STATUS: PASS]           [STATUS: NORMAL]             [STATUS: ILLEGAL SYNDICATE FRONT]
+```ts
+type RealMerchantId = `OSM-${string}`;
+type SimMerchantId  = `SIM-${string}`;   // disjoint from RealMerchantId
+interface Transaction { merchantId: SimMerchantId; /* ... */ }
 ```
 
-* **The Subject Under Review**: *Sweet Crumbs Artisan Bakery* (Indore, MP &bull; MCC 5462).
-* **The Disguise**: Registered as an artisanal pastry shop with legitimate physical store papers and FSSAI licenses.
-* **The Drift**: After 90 days, transaction volumes explode to **₹48.5 Lakhs/month** (**13.8&times; declared turnover**). Over **68%** of transactions occur between **22:30 and 02:00**, precisely synchronized with cricket match death overs and midnight wager settlements. Payers are distributed across 28 Indian states with a repeat customer rate of only **3.6%**.
-* **The Counter-Example**: *Golden Crust Patisserie* (Pune, MH &bull; MCC 5462). Experiencing an organic 18% turnover surge due to festive Mother's Day catering. Standard gateways trigger false-positive freezes. AegisPay's diurnal retail filters identify **94% local Pune patrons** and standard daylight retail curves (08:30 – 21:00), automatically granting **Tier 0 immunity**.
+`RealMerchant` has no nullable risk fields at all — if a real merchant could
+hold a score, the boundary would already be broken.
 
 ---
 
-## 🔬 The 5 Behavioral Drift Dimensions
-
-AegisPay continuously computes a composite vector drift score ($0 - 100$) across 5 mathematical dimensions:
-
-```
-                                  COMPOSITE DRIFT VECTOR
-                                
-   ┌───────────────────────┬────────────────────────┬────────────────────────┐
-   │ 1. Temporal & Match   │ 2. Spatial Shannon     │ 3. Benford & Round     │
-   │    Correlation (25%)  │    Entropy (25%)       │    Clustering (20%)    │
-   └───────────┬───────────┴───────────┬────────────┴───────────┬────────────┘
-               │                       │                        │
-               └───────────────────────┼────────────────────────┘
-                                       │
-               ┌───────────────────────┴────────────┬────────────────────────┐
-               │ 4. Payer Graph & Retention         │ 5. Multi-Modal Ground  │
-               │    Entropy (15%)                   │    Reconciliation (15%)│
-               └────────────────────────────────────┴────────────────────────┘
-```
-
-### 1. Temporal Clustering & Match Window Synchronization ($W_1 = 0.25$)
-* **Mechanism**: Evaluates hourly timestamp distributions against declared MCC 5462 diurnal retail curves (peak hours: 08:30 – 21:30).
-* **Syndicate Signature**: Concentrates 65%+ of daily transaction volume in the midnight window (22:30 – 02:00) synchronized with live cricket death overs and bet settlement batches.
-* **Metric**: Ratio of night match-window transactions to total daily processed volume:
-  $$\text{Ratio}_{\text{night}} = \frac{V_{22:30 - 02:00}}{V_{\text{total}}}$$
-
-### 2. Geographic Dispersion & Shannon Spatial Entropy ($W_2 = 0.25$)
-* **Mechanism**: Measures the spatial entropy of payer geolocations relative to the merchant's registered physical store address.
-* **Formula**:
-  $$H(S) = -\sum_{i=1}^{k} p_i \log_2(p_i)$$
-  *(where $p_i$ is the probability mass of payers originating from state $i$)*
-* **Syndicate Signature**: A neighborhood retail bakery with no cold-chain national delivery logistics receiving UPI payments from 28 states exhibits near-maximum entropy ($H(S) \to \log_2(28)$).
-
-### 3. Benford's Law & Round Amount Clustering ($W_3 = 0.20$)
-* **Mechanism**: Compares ticket size distributions against natural retail pricing laws and fractional menu pricing (tax, decimal figures like ₹240, ₹485).
-* **Syndicate Signature**: Wagering accounts exhibit 90%+ clustering in round integer denominations: ₹1,000, ₹2,500, ₹5,000, ₹10,000, and ₹20,000 without fractional change.
-
-### 4. Payer Retention & Graph Churn Entropy ($W_4 = 0.15$)
-* **Mechanism**: Tracks the graph network ratio of repeat local customers versus single-use payer wallets.
-* **Syndicate Signature**: Genuine neighborhood bakeries retain **35% – 50% repeat patrons**. Betting fronts exhibit **< 4% repeat rates**; thousands of disposable, single-use wallets routed via temporary Telegram bet channels.
-
-### 5. Multi-Modal Footprint & Ground Reconciliation ($W_5 = 0.15$)
-* **Mechanism**: Cross-references ongoing volume velocity ($V_{\text{actual}} / V_{\text{declared}}$) with verified external signals: OpenStreetMap footprint, online menu presence, Zomato/Swiggy delivery integrations, and verified Google Maps footfall.
-
----
-
-## 🛡️ Proportionate Tiered Response Matrix
-
-Rather than destructive, binary account freezing, AegisPay enforces a dynamic, graduated 4-tier intervention matrix:
-
-| Tier | Risk Score | Status | Automated Intervention | Merchant Impact | Example |
-|---|---|---|---|---|---|
-| **Tier 0: Safe** | `0 - 25` | **ACTIVE** | Instant settlement, dynamic seasonal surge dampener active. | Zero friction; 100% liquidity. | *Golden Crust Patisserie* |
-| **Tier 1: Monitor** | `26 - 55` | **ACTIVE** | Passive telemetry, dynamic checkout prompt requesting itemized retail confirmation. | Zero hold; soft verification. | *Flour Power Cafe* |
-| **Tier 2: Restrict** | `56 - 80` | **RESTRICTED** | 20% rolling reserve hold, out-of-state ticket cap (₹1,000), automated live video POS audit dispatched. | Controlled liquidity; syndicate economics broken. | *Apex Dry Cleaners* |
-| **Tier 3: Quarantine** | `81 - 100` | **QUARANTINED** | Settlement payout hold, UPI handle velocity throttled, Gemini AI generates court-admissible FIU-IND STR report. | Account isolated; legal dossier submitted. | *Sweet Crumbs Bakery* |
-
----
-
-## 🕸️ Mule Syndicate Topology & Cross-MCC Smurfing
-
-Organized betting operators avoid single-merchant velocity thresholds by smurfing deposits across multiple diverse retail MCCs:
+## Architecture
 
 ```mermaid
 graph TD
-    classDef syndicate fill:#be123c,stroke:#f43f5e,stroke-width:2px,color:#fff;
-    classDef mule fill:#18181b,stroke:#f43f5e,stroke-width:2px,color:#fff;
-    classDef legit fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#fff;
-    classDef cluster fill:#1e1e24,stroke:#38bdf8,stroke-width:1px,color:#fff;
+    Browser["React + Vite frontend :5173"]
+    Express["Express + TypeScript API :5000"]
+    ML["FastAPI ML service :8001"]
+    OSM["OSM snapshot osm_shops.json (real, display only)"]
+    SIM["Simulated catalogue simulated_merchants.json (SIM-*)"]
+    Artifacts["Model artifacts: model.joblib, metrics.json, model_card.json"]
 
-    HUB["⚡ Central Betting Syndicate Aggregator<br/>(Offshore Settlement Hub)"]:::syndicate
-
-    VPN["🔒 Shared VPN Subnet<br/>(103.21.244.0/24)"]:::cluster
-    NORTH["👥 Payer Cluster: North India<br/>(Delhi, Punjab, UP)"]:::cluster
-    WEST["👥 Payer Cluster: West India<br/>(Gujarat, Mumbai)"]:::cluster
-
-    M1["🥐 Sweet Crumbs Bakery<br/>(Indore &bull; MCC 5462 &bull; Score: 92)"]:::mule
-    M2["👔 Apex Dry Cleaners<br/>(Bhopal &bull; MCC 7210 &bull; Score: 78)"]:::mule
-    M3["✂️ Velvet Scissor Studio<br/>(Ahmedabad &bull; MCC 7230 &bull; Score: 74)"]:::mule
-
-    LEGIT["🥖 Golden Crust Patisserie<br/>(Pune &bull; MCC 5462 &bull; Score: 16)"]:::legit
-
-    NORTH -->|Midnight UPI Stakes| M1
-    NORTH -->|Midnight UPI Stakes| M2
-    WEST -->|Death-Over Bets| M1
-    WEST -->|Death-Over Bets| M3
-
-    VPN -.->|Shared Device ID| M1
-    VPN -.->|Shared Device ID| M2
-
-    M1 -->|Smurfed Settlement Outflow| HUB
-    M2 -->|Smurfed Settlement Outflow| HUB
-    M3 -->|Smurfed Settlement Outflow| HUB
-
-    subgraph ISOLATED_SAFE_ZONE [Safeguarded Legitimate Ecosystem]
-        LEGIT
-    end
+    Browser -->|"/api/*"| Express
+    Express -->|"/api/ml/* proxy, 4s timeout"| ML
+    Express --> OSM
+    Express --> SIM
+    ML --> SIM
+    ML --> Artifacts
 ```
 
----
-
-## 🤖 Autonomous Gemini AI Forensic Investigator
-
-AegisPay integrates **Google Gemini 2.5 Flash** (via the official `@google/genai` SDK) to act as an autonomous financial crime compliance officer:
-
-* **Automated Evidence Compilation**: Analyzes anomalous transaction vectors and compares them against declared merchant profiles.
-* **Statutory Violation Mapping**: Evaluates violations under:
-  * **Prevention of Money Laundering Act (PMLA), 2002** (Section 3 & 12).
-  * **The Public Gambling Act, 1867** / State Gaming Enactments.
-  * **Payment and Settlement Systems Act, 2007** (Unauthorized aggregator routing).
-* **FIU-IND Suspicious Transaction Report (STR)**: Generates a complete, court-admissible regulatory narrative ready for immediate export to Financial Intelligence Unit (FIU-IND) compliance portals.
+Three services, one repository. The ML service never reads the real OSM
+directory; the Express directory never scores a real identity.
 
 ---
 
-## 🗺️ Ground-Truth Merchant Verification: OpenStreetMap (OSM)
+## Quick start (Windows PowerShell)
 
-To ensure realistic, zero-cost physical storefront verification without vendor lock-in or commercial API charges:
-* Integrated with **OpenStreetMap / Overpass API** to query real physical shopfronts, building polygons, and street-level points-of-interest (POIs) across Indian tier-1 and tier-2 cities.
-* Cross-checks physical store presence against declared MCC categories to distinguish legitimate brick-and-mortar retailers from fictitious shell addresses.
+Prerequisites: Node.js (backend declares `@types/node` 22), Python 3.11.
 
----
+```powershell
+# 1. Node dependencies
+npm install --prefix backend
+npm install --prefix frontend
 
-## 💻 Tech Stack & Engineering Highlights
+# 2. Python 3.11 environment
+py -3.11 -m venv ml-service\.venv
+.\ml-service\.venv\Scripts\python.exe -m pip install -r ml-service\requirements.txt
+.\ml-service\.venv\Scripts\python.exe ml-service\scripts\check_env.py
+.\ml-service\.venv\Scripts\python.exe -m pip check
 
-| Layer | Technologies |
-|---|---|
-| **Frontend UI** | **React 19**, **TypeScript**, **Vite 6**, **Tailwind CSS 3.4**, **Lucide React** |
-| **Design Language** | **Baunfire-inspired** minimalist noir aesthetic, hairline typography, high-contrast monochrome cards, interactive SVG topology |
-| **Backend API** | **Node.js (v18+)**, **Express 4.21**, **TypeScript**, **TSX** |
-| **AI Intelligence** | **Google Gemini 2.5 Flash** via official `@google/genai` SDK |
-| **Geo-Intelligence** | **OpenStreetMap Overpass API** (Free, key-less POI ground truth) |
-| **Gateway Sandbox** | High-fidelity **PayU Payment Gateway** sandbox telemetry simulator |
+# 3. Train the model (writes artifacts/model.joblib + metrics + model card)
+.\ml-service\.venv\Scripts\python.exe ml-service\scripts\train.py
 
----
+# 4. Optional: regenerate the OSM dataset (deterministic)
+.\ml-service\.venv\Scripts\python.exe scripts\normalize_osm.py
 
-## 📂 Project Directory Structure
-
-```
-d:\Hackathon\
-├── backend\
-│   ├── src\
-│   │   ├── data\
-│   │   │   └── merchantsData.ts          # Baseline merchant seeds & OSM snapshots
-│   │   ├── routes\
-│   │   │   ├── ai.ts                     # Gemini AI forensic audit endpoint
-│   │   │   ├── merchants.ts              # Merchant directory & tier management
-│   │   │   ├── osm.ts                    # OpenStreetMap Overpass verification
-│   │   │   ├── simulator.ts              # Adversarial scenario injection
-│   │   │   ├── syndicate.ts              # Network topology graph endpoints
-│   │   │   └── transactions.ts           # Real-time transaction stream
-│   │   ├── services\
-│   │   │   ├── driftEngine.ts            # 5D mathematical drift calculator
-│   │   │   ├── geminiService.ts          # Gemini 2.5 Flash forensic agent
-│   │   │   ├── osmService.ts             # OpenStreetMap POI & footprint crawler
-│   │   │   ├── simulatorService.ts       # IPL & festive burst event engine
-│   │   │   └── syndicateDetector.ts      # Cross-MCC graph smurfing detector
-│   │   ├── types\
-│   │   │   └── index.ts                  # Shared TypeScript interfaces
-│   │   └── index.ts                      # Express API entry point
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── frontend\
-│   ├── src\
-│   │   ├── components\
-│   │   │   ├── AIForensicInspector.tsx    # Court-admissible STR dossier generator
-│   │   │   ├── ApiDocsConfig.tsx          # API & environment setup guide
-│   │   │   ├── BakeryCaseStudy.tsx        # Head-to-head bakery comparison
-│   │   │   ├── DashboardOverview.tsx      # Baunfire executive KPI cockpit
-│   │   │   ├── MerchantDirectory.tsx      # Directory with dynamic policy sliders
-│   │   │   ├── Navbar.tsx                 # Minimalist header with live ticker
-│   │   │   ├── PlatformOverviewModal.tsx  # Architectural guide & tour modal
-│   │   │   ├── SyndicateGraph.tsx         # Interactive SVG network topology
-│   │   │   └── TransactionStream.tsx      # Live telemetry feed & scenario injector
-│   │   ├── types.ts                       # Frontend TypeScript types
-│   │   ├── App.tsx                        # Main application orchestrator
-│   │   ├── index.css                      # Baunfire styling & keyframe animations
-│   │   └── main.tsx                       # React DOM root
-│   ├── .env.example
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.ts
-│
-└── README.md                              # This document
-```
-
----
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-* **Node.js**: v18.0.0 or higher
-* **npm**: v9.0.0 or higher
-* **Google Gemini API Key**: Free key from [Google AI Studio](https://aistudio.google.com/)
-
----
-
-### Step 1: Backend Setup
-
-```bash
-# 1. Navigate to backend directory
-cd backend
-
-# 2. Install dependencies
-npm install
-
-# 3. Create .env file from template
-cp .env.example .env
-```
-
-Configure `backend/.env`:
-```env
-PORT=5000
-
-# Google Gemini API Key (Required for AI Forensic Investigator)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# (Optional) PayU Payment Gateway Sandbox Credentials
-PAYU_MERCHANT_KEY=your_payu_merchant_key_here
-PAYU_MERCHANT_SALT=your_payu_merchant_salt_here
-PAYU_ENV=test
-```
-
-Start the backend:
-```bash
-# Development mode with hot-reload
+# 5. Start all three services
 npm run dev
+```
 
-# Or build & start production server
+`npm run dev` starts the ML service with the venv interpreter
+(`uvicorn app.main:app --host 127.0.0.1 --port 8001`), the API on `:5000` and
+the frontend on `:5173`.
+
+Individual services:
+
+```powershell
+npm run dev:backend                     # API only
+npm run dev:frontend                    # frontend only
+cd ml-service
+..\ml-service\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+```
+
+Environment variables: copy `backend/.env.example` to `backend/.env`. `PORT`,
+`OSM_DATA_DIR`, `ML_SERVICE_URL`, `ML_SERVICE_PORT` and an optional
+`GEMINI_API_KEY` (without it the deterministic report engine is used). No secret
+is required for any core feature.
+
+---
+
+## API surface
+
+| Method | Path | Rule |
+| --- | --- | --- |
+| GET | `/api/health` | service + data-model counts |
+| GET | `/api/merchants?origin=real_osm\|simulated\|all` | `dataOrigin` on every item |
+| GET | `/api/merchants/:id` | real record returned without risk fields |
+| POST | `/api/merchants/:id/tier` | simulated only (409 for real) |
+| GET | `/api/risk/merchant/:id` | simulated only (409 for real) |
+| GET | `/api/transactions?merchantId=` | simulated only (409 for real) |
+| GET | `/api/transactions/stats` | simulated stream statistics |
+| POST | `/api/simulator/run` | may target only simulated merchants |
+| GET | `/api/syndicate/graph` | simulated nodes only |
+| POST | `/api/ai/investigate/:id` | simulated only (409 for real) |
+| GET | `/api/osm/status`, `/api/osm/shops` | real directory, no risk data |
+| GET | `/api/ml/health` | Express proxy to FastAPI |
+| GET | `/api/ml/model/info` | model card, metrics, provenance, limitations |
+| GET | `/api/ml/datasets` | dataset access and licence status |
+| POST | `/api/ml/score/transaction` | `SIM-*` only (422 otherwise) |
+| POST | `/api/ml/score/merchant` | aggregated `SIM-*` score |
+
+Errors always use `{ "error": { "code", "message", "details"? } }`. Full
+request/response examples: [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md).
+
+---
+
+## ML methodology
+
+**Unit of analysis:** merchant × 3-day window over a 90-day simulated history.
+
+1. **Data.** Deterministic simulator (seed `20261104`) produces 15,537 simulated
+   transactions for 14 `SIM-*` merchants. Café amounts are partly drawn from
+   `coffee_shop_transactions.csv` basket composition, using **assumed** per-item
+   prices (the CSV has no amount column).
+2. **Labels** come from scenario parameters (`normal` | `drift` | `syndicate`)
+   plus a fixed injection day (day 55). Labels are never derived from a feature
+   the model sees; `tests/test_leakage.py` fits a model on shuffled labels and
+   asserts the AUC collapses to chance.
+3. **Features (20):** amount statistics and round-amount ratio, night share,
+   hour-of-day entropy, 10-minute burst synchronisation, Benford divergence,
+   geographic dispersion and Shannon spatial entropy, payer retention and churn
+   entropy, Jensen–Shannon amount drift against the category baseline, robust
+   median/MAD deviations against the merchant's own adaptive baseline, and graph
+   features (degree, cycle membership, shared-payer overlap, component size).
+4. **Adaptive baselines:** per-merchant rolling median/MAD over the trailing 30
+   days, with an explicit category fallback and `coldStart` flag when a merchant
+   has fewer than 40 transactions.
+5. **Graph:** payer → merchant bipartite graph plus a merchant flow graph (an
+   edge means ≥3 payers paid A then B within six hours). Cycles and dense
+   components feed the graph score. Built from `SIM-*` transactions only.
+6. **Model:** scikit-learn `HistGradientBoostingClassifier` with isotonic
+   calibration and balanced sample weights. Split by **merchant and time**:
+   held-out merchants and future windows are never trained on.
+7. **Risk engine:** deterministic blend of rule (0.35), model probability (0.45)
+   and graph exposure (0.20) → 0–100 score, tier thresholds 25 / 55 / 80, plus
+   human-readable reasons.
+
+**Measured metrics** (from `ml-service/artifacts/metrics.json`, seed 20261104,
+`tests` and `npm run build` run on 2026-11-05):
+
+| Slice | n | Positives | Precision | Recall | F1 | ROC-AUC |
+| --- | --- | --- | --- | --- | --- | --- |
+| Time holdout (future windows of trained merchants) | 80 | 24 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Merchant holdout (unseen `SIM-*` merchants) | 120 | 12 | 1.00 | 1.00 | 1.00 | 1.00 |
+
+> **Synthetic evaluation.** These numbers are perfect because the simulator's
+> injected typologies are strongly separable by design (round amounts,
+> night-time bursts, out-of-state payers, shared payer pools). They measure
+> pipeline correctness on synthetic data and are **not** real-world detection
+> accuracy. Real-world performance is **NOT VALIDATED**.
+> The model card (`ml-service/artifacts/model_card.json`) and
+> `GET /api/ml/model/info` carry the same warning.
+
+Not used for training: AMLSim, PaySim, BankSim, MoMTSim. Their access results,
+licences and schemas are recorded in
+[`ml-service/docs/DATASETS.md`](ml-service/docs/DATASETS.md) and reported live by
+`GET /api/ml/datasets`.
+
+---
+
+## OSM dataset
+
+```powershell
+.\ml-service\.venv\Scripts\python.exe scripts\normalize_osm.py
+# total shops: 360   cafés: 40   copies identical: True
+```
+
+Source: OpenStreetMap (ODbL-1.0), **© OpenStreetMap contributors**. The
+normalizer deduplicates by OSM type/id, requires a name and coordinates, maps
+tags to nine categories (`amenity=cafe` → café, MCC 5814), and keeps a
+deterministic category-balanced selection sorted by OSM type/id. Two runs
+produce byte-identical output.
+
+---
+
+## Repository layout
+
+```
+backend/            Express + TypeScript API (real directory, SIM risk, ML proxy)
+frontend/           React + Vite UI (directory tabs, SIM dashboards, ML Insights)
+ml-service/         FastAPI + scikit-learn pipeline, tests, model artifacts
+scripts/            normalize_osm.py (OSM source of truth), smoke.ps1
+docs/               API_CONTRACT.md, CLAIMS.md, EXECUTION_LOG.md
+osm_expanded_raw.json   Raw Overpass dump (ODbL-1.0)
+osm_shops.json          Normalized real shops (root + backend copy, identical)
+```
+
+---
+
+## Verification
+
+```powershell
 npm run build
-npm start
-# Backend runs on http://localhost:5000
+.\ml-service\.venv\Scripts\python.exe ml-service\scripts\check_env.py
+.\ml-service\.venv\Scripts\python.exe -m pytest ml-service\tests -q
+powershell -ExecutionPolicy Bypass -File scripts\smoke.ps1
 ```
 
----
-
-### Step 2: Frontend Setup
-
-Open a new terminal:
-```bash
-# 1. Navigate to frontend directory
-cd frontend
-
-# 2. Install dependencies
-npm install
-
-# 3. Create .env file
-cp .env.example .env
-```
-
-Configure `frontend/.env`:
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-Start the frontend:
-```bash
-# Development server
-npm run dev
-# Frontend runs on http://localhost:5173
-
-# Or build production assets
-npm run build
-```
+The smoke script starts the stack if needed, then asserts that real merchants
+carry no risk data, that real ids are rejected by risk/transaction/simulator
+routes, that the syndicate graph is `SIM-*` only, and that `/api/ml/*` works
+through the proxy and returns 502 when the ML service is stopped.
 
 ---
 
-## 🎮 Interactive Stress Simulator
+## Limitations
 
-Test AegisPay's real-time detection and false-positive defense using the built-in scenario injectors in the UI or via API:
+* The risk layer is entirely synthetic; no real betting-front or fraud label was
+  used, and no real merchant is accused of anything.
+* Perfect synthetic metrics say nothing about production performance
+  (**NOT VALIDATED**).
+* No latency SLO is claimed: no benchmark was run for this build.
+* `GET /api/ai/investigate/:id` returns a demo narrative. It is not
+  court-admissible, not a regulatory filing, and is labelled simulated.
+* AMLSim was cloned and inspected but not built (it targets Java 8; only Java 26
+  and no Maven are available here).
 
-| Scenario | Trigger Button | Simulated Event | Expected System Behavior |
-|---|---|---|---|
-| **IPL Betting Spike** | `+ IPL Burst` | Injects 8 midnight UPI bets (₹1k – ₹5k) from out-of-state into Sweet Crumbs Bakery. | Temporal & Benford drift score jumps to **92/100**; account quarantined to **Tier 3**; settlements held. |
-| **Festive Cake Rush** | `+ Cake Rush` | Injects daytime bulk orders into Golden Crust Patisserie for Mother's Day. | Diurnal filter activates; 94% local customer loyalty recognized; **Tier 0 Safe** preserved with **0% hold**. |
-| **Mule Ring Smurf** | `+ Mule Smurf` | Injects synchronized deposits across the Laundromat and Barber Studio. | Shared device and burst synchronization flagged; **Tier 2 Restrictions** applied. |
-| **Reset Baseline** | `Reset` | Flushes injected transactions back to initial state. | Returns all monitored nodes to clean baseline state. |
+## Licence and attribution
 
----
-
-## 📡 REST API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/merchants` | Retrieve all monitored merchants with 5D drift metrics |
-| `GET` | `/api/merchants/:id` | Get single merchant details and active interventions |
-| `POST` | `/api/merchants/:id/tier` | Dynamically update merchant risk tier, reserve %, or geofence |
-| `GET` | `/api/transactions` | Stream of real-time ingested transactions with risk tags |
-| `GET` | `/api/syndicate/graph` | Return network topology nodes and edge relationships |
-| `POST` | `/api/ai/investigate/:id` | Execute Gemini AI forensic audit and generate FIU-IND STR report |
-| `POST` | `/api/simulator/scenario` | Inject adversarial scenarios (`IPL_BETTING_BURST`, `FESTIVE_BAKERY_RUSH`, etc.) |
-| `GET` | `/api/osm/status` | Check OpenStreetMap Overpass connection and cached snapshots |
-| `GET` | `/api/osm/shops` | Query verified physical merchant locations from OpenStreetMap |
-
----
-
-## 🏆 Key Performance Indicators (KPIs)
-
-* **96.2% Syndicate Detection Accuracy**: Exposes stealth betting collection funnels within 3 match cycles.
-* **99.4% False-Positive Immunity**: Zero false account freezes on genuine merchants during seasonal catering spikes.
-* **42 ms Telemetry Latency**: Continuous sub-second 5-dimensional vector evaluation per transaction.
-* **100% Court-Admissible Documentation**: Standardized, automated FIU-IND STR dossiers with direct statutory citations.
-
----
-
-## ⚖️ License & Attribution
-
-This project is licensed under the [MIT License](LICENSE).
-
-Developed for the **Follow The Money Innovation Challenge**, organized by **IIM Bangalore** and **PayU India**.  
-*Disclaimer: Merchant names and OpenStreetMap locations are real open-data references; all transaction volumes, risk scores, and syndication scenarios are high-fidelity synthetic demo data engineered for research and competition purposes.*
+Application code: see repository licence. Real business data: OpenStreetMap,
+**© OpenStreetMap contributors**, ODbL-1.0. External research datasets are not
+committed to this repository.
