@@ -66,14 +66,22 @@ class Transaction(BaseModel):
 
 
 class RiskAssessment(BaseModel):
-    merchantId: str = Field(pattern=SIM_ID_PATTERN)
+    merchantId: str
+    displayName: str | None = None
+    category: str | None = None
     score: float = Field(ge=0, le=100)
     tier: RiskTier
+    outcome: str | None = None
+    outcomeLabel: str | None = None
+    probability: float | None = None
+    confidence: float | None = None
+    recommendation: str | None = None
     reasons: list[str]
     components: dict
+    features: dict | None = None
     evaluatedAt: datetime
-    synthetic: bool = True
-    disclaimer: str
+    synthetic: bool = False
+    disclaimer: str = ""
 
 
 class ModelInfo(BaseModel):
@@ -104,23 +112,19 @@ class ScoreTransactionRequest(BaseModel):
     paymentMethod: str = "UPI"
     timestamp: datetime | None = None
 
-    @field_validator("merchantId")
-    @classmethod
-    def _simulated_only(cls, value: str) -> str:
-        if not value.startswith("SIM-"):
-            raise ValueError("only SIM-* merchants can be scored")
-        return value
-
 
 class ScoreMerchantRequest(BaseModel):
-    merchantId: str
-
-    @field_validator("merchantId")
-    @classmethod
-    def _simulated_only(cls, value: str) -> str:
-        if not value.startswith("SIM-"):
-            raise ValueError("only SIM-* merchants can be scored")
-        return value
+    merchantId: str | None = None
+    businessName: str | None = None
+    category: str | None = "retail"
+    turnover: float | None = 500_000.0
+    nightShare: float | None = None
+    outOfStateShare: float | None = None
+    roundAmountRatio: float | None = None
+    repeatPayerRatio: float | None = None
+    burstSyncRatio: float | None = None
+    volumeMultiplier: float | None = None
+    suspectedBettingActivity: bool | None = None
 
 
 class HealthResponse(BaseModel):

@@ -9,6 +9,7 @@ import {
   Layers, 
   Bot, 
   Key, 
+  Cpu,
   CheckCircle2, 
   ArrowRight,
   TrendingUp,
@@ -278,11 +279,11 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                   action: 'Launch AI Forensic Agent'
                 },
                 {
-                  tab: 'api-config',
-                  title: 'API Setup & Environment Configuration',
-                  icon: Key,
-                  desc: 'Ready-to-copy .env setup for the key-less OpenStreetMap / Overpass data source, plus optional Gemini AI and PayU sandbox credentials.',
-                  action: 'View API Configuration'
+                  tab: 'ml-insights',
+                  title: 'ML Betting Platform & Syndicate Predictor',
+                  icon: Cpu,
+                  desc: 'Calibrated machine learning model to evaluate behavioral drift and predict illegal betting platform infiltration for any business.',
+                  action: 'Run ML Predictor'
                 }
               ].map((feat, idx) => {
                 const Icon = feat.icon;

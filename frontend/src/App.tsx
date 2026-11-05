@@ -142,16 +142,6 @@ export const App: React.FC = () => {
   };
 
   const handleSelectMerchantForAI = (merchantId: string) => {
-    if (!merchantId.startsWith('SIM-')) {
-      setToast({
-        scenario: 'RESET',
-        title: 'Display-only record',
-        description: 'Real OpenStreetMap businesses are directory records and are never investigated or scored.',
-        badge: 'OSM · Display only',
-        type: 'info',
-      });
-      return;
-    }
     navigate('ai-investigator');
     handleRunInvestigation(merchantId);
   };
@@ -215,6 +205,7 @@ export const App: React.FC = () => {
           {activeTab === 'ml-insights' && (
             <MLInsights
               simulatedMerchants={simulatedMerchants}
+              realMerchants={realMerchants}
               modelInfo={modelInfo}
               mlOnline={mlOnline}
               onRefresh={fetchData}
@@ -237,22 +228,6 @@ export const App: React.FC = () => {
       </main>
 
       <SimulationToast toast={toast} onDismiss={() => setToast(null)} onViewStream={() => navigate('stream')} />
-
-      <footer className="border-t border-white/[0.08] bg-[#050506] py-8 text-xs text-neutral-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
-            <span className="font-bold text-white tracking-tight">AEGISPAY SENTINEL</span>
-            <span className="hidden sm:inline">&bull;</span>
-            <span className="font-mono text-[11px] text-neutral-400">
-              Follow The Money Innovation Challenge (IIM Bangalore &times; PayU)
-            </span>
-          </div>
-          <div className="font-mono text-[11px] text-neutral-400 text-center">
-            {realMerchants.length} real OSM shops · display only &middot;{' '}
-            {simulatedMerchants.length} simulated merchants with synthetic risk
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

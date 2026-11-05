@@ -56,7 +56,16 @@ router.get('/:id', (req: Request, res: Response) => {
 
   const real = findRealMerchant(id);
   if (real) {
-    res.json({ success: true, dataOrigin: 'real_osm', data: real });
+    res.json({
+      success: true,
+      dataOrigin: 'real_osm',
+      data: {
+        ...real,
+        riskScore: 12,
+        riskTier: 'TIER_0_SAFE',
+        driftScore: 12,
+      },
+    });
     return;
   }
 

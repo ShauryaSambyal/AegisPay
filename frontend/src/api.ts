@@ -5,6 +5,7 @@ import {
   MerchantScoreResponse,
   MlDatasets,
   MlModelInfo,
+  PredictMerchantRequest,
   RiskTier,
   SimulatedMerchant,
   SyndicateGraphType,
@@ -110,14 +111,19 @@ export const fetchMlDatasets = async (): Promise<MlDatasets> => {
   return parse<MlDatasets>(response);
 };
 
-export const scoreMerchant = async (merchantId: string): Promise<MerchantScoreResponse> => {
+export const predictBusinessOutcome = async (
+  request: string | PredictMerchantRequest
+): Promise<MerchantScoreResponse> => {
+  const body = typeof request === 'string' ? { merchantId: request } : request;
   const response = await fetch(`${API_BASE}/api/ml/score/merchant`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ merchantId }),
+    body: JSON.stringify(body),
   });
   return parse<MerchantScoreResponse>(response);
 };
+
+export const scoreMerchant = predictBusinessOutcome;
 
 export const datasetLabel = (entry: DatasetEntry): string =>
   entry.available ? 'available locally' : 'not available in this environment';

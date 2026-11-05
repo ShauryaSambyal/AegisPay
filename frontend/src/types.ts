@@ -266,18 +266,40 @@ export interface MlDatasets {
   checkedAt: string;
 }
 
+export interface PredictMerchantRequest {
+  merchantId?: string;
+  businessName?: string;
+  category?: string;
+  turnover?: number;
+  nightShare?: number;
+  outOfStateShare?: number;
+  roundAmountRatio?: number;
+  repeatPayerRatio?: number;
+  burstSyncRatio?: number;
+  volumeMultiplier?: number;
+  suspectedBettingActivity?: boolean;
+}
+
 export interface MerchantScoreResponse {
-  merchantId: SimMerchantId;
+  merchantId: string;
+  displayName?: string;
+  category?: string;
   score: number;
   tier: RiskTier;
+  outcome?: string;
+  outcomeLabel?: string;
+  probability?: number;
+  confidence?: number;
+  recommendation?: string;
   reasons: string[];
   components: {
     rule: number;
     model: number;
     graph: number;
-    weights: Record<string, number>;
-    rules: Record<string, number>;
+    weights?: Record<string, number>;
+    rules?: Record<string, number>;
   };
+  features?: Record<string, number>;
   evaluatedAt: string;
   windowStart: string;
   transactionCount: number;

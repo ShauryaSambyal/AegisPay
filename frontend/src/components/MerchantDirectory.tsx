@@ -257,12 +257,12 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                       <select
                         value={merchant.riskTier}
                         onChange={event => onUpdateMerchantTier(merchant.id, { tier: event.target.value as RiskTier })}
-                        className="w-full px-2 py-1.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-white font-mono"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#14141e] border border-[#2e2e42] text-white font-mono focus:border-white focus:outline-none shadow-sm"
                       >
-                        <option value="TIER_0_SAFE">Tier 0 · Safe</option>
-                        <option value="TIER_1_MONITOR">Tier 1 · Monitor</option>
-                        <option value="TIER_2_RESTRICT">Tier 2 · Restrict</option>
-                        <option value="TIER_3_QUARANTINE">Tier 3 · Quarantine</option>
+                        <option value="TIER_0_SAFE" className="bg-[#14141e] text-emerald-400">Tier 0 · Safe</option>
+                        <option value="TIER_1_MONITOR" className="bg-[#14141e] text-blue-400">Tier 1 · Monitor</option>
+                        <option value="TIER_2_RESTRICT" className="bg-[#14141e] text-amber-400">Tier 2 · Restrict</option>
+                        <option value="TIER_3_QUARANTINE" className="bg-[#14141e] text-rose-400">Tier 3 · Quarantine</option>
                       </select>
                     </label>
                     <label className="block">
