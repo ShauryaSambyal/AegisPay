@@ -27,13 +27,14 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5000
 
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/backend/package*.json ./backend/
 COPY --from=builder /app/backend/node_modules ./backend/node_modules
 COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/src/data ./backend/src/data
+COPY --from=builder /app/backend/src/data ./src/data
 COPY --from=builder /app/frontend/dist ./frontend/dist
 COPY --from=builder /app/osm_shops.json ./osm_shops.json
-COPY --from=builder /app/backend/src/data/osm_shops.json ./backend/src/data/osm_shops.json
-COPY package.json ./
 
 EXPOSE 5000
 

@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { RealMerchant, RealMerchantId } from '../types/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * REAL OpenStreetMap identities — display-only directory records.
@@ -42,16 +46,28 @@ export interface OsmShopsFile {
   shops: OsmShopRecord[];
 }
 
-const dataDir = (): string => {
+export const osmShopsPath = (): string => {
   if (process.env.OSM_DATA_DIR) {
-    return path.resolve(process.cwd(), process.env.OSM_DATA_DIR);
+    const custom = path.resolve(process.cwd(), process.env.OSM_DATA_DIR, 'osm_shops.json');
+    if (fs.existsSync(custom)) return custom;
   }
-  const backendData = path.resolve(process.cwd(), 'backend/src/data');
-  if (fs.existsSync(backendData)) return backendData;
-  return path.resolve(process.cwd(), 'src/data');
+  const candidates = [
+    path.resolve(process.cwd(), 'backend/src/data/osm_shops.json'),
+    path.resolve(process.cwd(), 'src/data/osm_shops.json'),
+    path.resolve(process.cwd(), 'osm_shops.json'),
+    path.resolve(process.cwd(), 'backend/dist/data/osm_shops.json'),
+    path.resolve(__dirname, 'osm_shops.json'),
+    path.resolve(__dirname, '../../src/data/osm_shops.json'),
+    path.resolve(__dirname, '../../../backend/src/data/osm_shops.json'),
+    path.resolve(__dirname, '../../../osm_shops.json'),
+    path.resolve(process.cwd(), '../backend/src/data/osm_shops.json'),
+    path.resolve(process.cwd(), '../osm_shops.json'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return candidates[0];
 };
-
-export const osmShopsPath = (): string => path.join(dataDir(), 'osm_shops.json');
 
 const loadShopsFile = (): OsmShopsFile | null => {
   const file = osmShopsPath();

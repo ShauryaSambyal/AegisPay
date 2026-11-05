@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   RiskTier,
   SimBaseline,
@@ -8,6 +9,9 @@ import {
   SimulatorMetrics,
   SimMerchantId,
 } from '../types/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * SIMULATED merchants — anonymized ids with fictional display names.
@@ -98,23 +102,60 @@ interface CatalogFile {
   merchants: CatalogRow[];
 }
 
-const dataDir = (): string => {
-  if (process.env.OSM_DATA_DIR) {
-    return path.resolve(process.cwd(), process.env.OSM_DATA_DIR);
-  }
-  const backendData = path.resolve(process.cwd(), 'backend/src/data');
-  if (fs.existsSync(backendData)) return backendData;
-  return path.resolve(process.cwd(), 'src/data');
+const FALLBACK_CATALOG: CatalogFile = {
+  version: '1.0.0',
+  city: 'Bengaluru',
+  state: 'Karnataka',
+  merchants: [
+    { id: 'SIM-0001', displayName: 'Aurora Bakehouse', category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 350000, onboardedAt: '2024-06-18', baselineAvgTicket: 205, baselineNightShare: 0.03, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0002', displayName: 'Maple Crumb Bakery', category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 900000, onboardedAt: '2023-02-09', baselineAvgTicket: 240, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0003', displayName: 'Nightowl Diner', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 1500000, onboardedAt: '2024-01-22', baselineAvgTicket: 760, baselineNightShare: 0.18, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0004', displayName: 'Copper Pot Kitchen', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 2100000, onboardedAt: '2023-11-03', baselineAvgTicket: 890, baselineNightShare: 0.11, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0005', displayName: 'Blue Kettle Cafe', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 480000, onboardedAt: '2024-04-11', baselineAvgTicket: 310, baselineNightShare: 0.01, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0006', displayName: 'Corner Bean Roasters', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 390000, onboardedAt: '2023-08-30', baselineAvgTicket: 285, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0007', displayName: 'Green Crate Express', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 620000, onboardedAt: '2024-02-17', baselineAvgTicket: 185, baselineNightShare: 0.12, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0008', displayName: 'Sunrise Provisions', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 740000, onboardedAt: '2023-06-05', baselineAvgTicket: 210, baselineNightShare: 0.05, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0009', displayName: 'Meridian Grocers', category: 'grocery', mcc: '5411', mccDescription: 'Grocery Stores & Supermarkets', declaredTurnoverMonthly: 4800000, onboardedAt: '2022-12-01', baselineAvgTicket: 640, baselineNightShare: 0.04, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0010', displayName: 'Lantern Pharmacy', category: 'pharmacy', mcc: '5912', mccDescription: 'Drug Stores & Pharmacies', declaredTurnoverMonthly: 1100000, onboardedAt: '2023-03-27', baselineAvgTicket: 470, baselineNightShare: 0.06, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0011', displayName: 'Pixel & Wire Electronics', category: 'electronics', mcc: '5732', mccDescription: 'Electronics Stores', declaredTurnoverMonthly: 2600000, onboardedAt: '2024-05-19', baselineAvgTicket: 6800, baselineNightShare: 0.03, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0012', displayName: 'Loom & Thread Apparel', category: 'clothing', mcc: '5651', mccDescription: 'Family Clothing Stores', declaredTurnoverMonthly: 1700000, onboardedAt: '2023-09-14', baselineAvgTicket: 1850, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0013', displayName: 'Harbour Rest Stop', category: 'hotel', mcc: '7011', mccDescription: 'Hotels & Motels', declaredTurnoverMonthly: 3400000, onboardedAt: '2023-05-08', baselineAvgTicket: 5400, baselineNightShare: 0.28, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0014', displayName: 'Velvet Tiger Snack Bar', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 980000, onboardedAt: '2024-03-02', baselineAvgTicket: 520, baselineNightShare: 0.15, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
+  ],
 };
 
-export const catalogPath = (): string => path.join(dataDir(), 'simulated_merchants.json');
+export const catalogPath = (): string => {
+  if (process.env.OSM_DATA_DIR) {
+    const custom = path.resolve(process.cwd(), process.env.OSM_DATA_DIR, 'simulated_merchants.json');
+    if (fs.existsSync(custom)) return custom;
+  }
+  const candidates = [
+    path.resolve(process.cwd(), 'backend/src/data/simulated_merchants.json'),
+    path.resolve(process.cwd(), 'src/data/simulated_merchants.json'),
+    path.resolve(process.cwd(), 'backend/dist/data/simulated_merchants.json'),
+    path.resolve(__dirname, 'simulated_merchants.json'),
+    path.resolve(__dirname, '../../src/data/simulated_merchants.json'),
+    path.resolve(__dirname, '../../../backend/src/data/simulated_merchants.json'),
+    path.resolve(process.cwd(), '../backend/src/data/simulated_merchants.json'),
+    path.resolve(process.cwd(), '../src/data/simulated_merchants.json'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return candidates[0];
+};
 
 const loadCatalog = (): CatalogFile => {
   const file = catalogPath();
-  if (!fs.existsSync(file)) {
-    throw new Error(`Simulated merchant catalogue missing at ${file}`);
+  if (fs.existsSync(file)) {
+    try {
+      return JSON.parse(fs.readFileSync(file, 'utf-8')) as CatalogFile;
+    } catch (err) {
+      console.warn(`[simulatedMerchants] Failed to parse ${file}, using fallback:`, err);
+    }
   }
-  return JSON.parse(fs.readFileSync(file, 'utf-8')) as CatalogFile;
+  console.log(`[simulatedMerchants] Using bundled catalog fallback (not found on disk at: ${file})`);
+  return FALLBACK_CATALOG;
 };
 
 export const tierForScore = (score: number): RiskTier => {
