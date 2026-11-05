@@ -1,98 +1,97 @@
-import React, { useState } from 'react';
-import { 
-  Network, 
-  Info, 
-  ShieldAlert, 
-  Share2, 
-  Layers, 
-  ExternalLink,
-  Lock,
-  Radio,
-  ArrowRight
-} from 'lucide-react';
-import { SyndicateGraph as SyndicateGraphType, SyndicateNode, Merchant } from '../types';
-import { getMerchantImage, SYNTHETIC_RISK_BADGE } from '../merchantVisuals';
+import React, { useMemo, useState } from 'react';
+import { ExternalLink, FlaskConical, Info, Radio } from 'lucide-react';
+import { SimulatedMerchant, SyndicateGraphType, SyndicateNode } from '../types';
 
 interface SyndicateGraphProps {
   graphData: SyndicateGraphType | null;
-  merchants: Merchant[];
+  simulatedMerchants: SimulatedMerchant[];
   onSelectMerchantForAI: (merchantId: string) => void;
 }
 
+const VIEW_WIDTH = 900;
+const VIEW_HEIGHT = 460;
+
+/** Deterministic layout: infra left, payer clusters bottom, ring centre, hub top. */
+const layout = (nodes: SyndicateNode[]): Record<string, { x: number; y: number }> => {
+  const groups: Record<string, SyndicateNode[]> = { HUB: [], CLUSTER: [], INFRA: [], SIM: [] };
+  nodes.forEach(node => {
+    if (node.type === 'SYNDICATE_AGGREGATOR') groups.HUB.push(node);
+    else if (node.type === 'PAYER_CLUSTER') groups.CLUSTER.push(node);
+    else if (node.type === 'IP_SUBNET') groups.INFRA.push(node);
+    else groups.SIM.push(node);
+  });
+
+  const positions: Record<string, { x: number; y: number }> = {};
+  groups.HUB.forEach((node, index) => {
+    positions[node.id] = { x: VIEW_WIDTH / 2 + index * 70, y: 60 };
+  });
+  groups.INFRA.forEach((node, index) => {
+    positions[node.id] = { x: 120, y: 150 + index * 90 };
+  });
+  groups.CLUSTER.forEach((node, index) => {
+    positions[node.id] = { x: 260 + index * 320, y: 390 };
+  });
+  const merchants = groups.SIM;
+  merchants.forEach((node, index) => {
+    const width = 520;
+    const step = merchants.length > 1 ? width / (merchants.length - 1) : 0;
+    positions[node.id] = { x: 210 + index * step, y: 235 + (index % 2) * 40 };
+  });
+  return positions;
+};
+
 export const SyndicateGraph: React.FC<SyndicateGraphProps> = ({
   graphData,
-  merchants,
-  onSelectMerchantForAI
+  simulatedMerchants,
+  onSelectMerchantForAI,
 }) => {
-  const [selectedNode, setSelectedNode] = useState<SyndicateNode | null>(null);
+  const [selected, setSelected] = useState<SyndicateNode | null>(null);
+  const positions = useMemo(() => (graphData ? layout(graphData.nodes) : {}), [graphData]);
 
   if (!graphData) {
     return (
       <div className="bf-card rounded-2xl p-12 text-center text-neutral-400 font-mono text-xs">
-        Loading network topology map...
+        Loading simulated network topology...
       </div>
     );
   }
 
-  const nodePositions: Record<string, { x: number; y: number }> = {
-    'HUB-BET-SYNDICATE': { x: 450, y: 70 },
-    'MERC-BAKE-001': { x: 300, y: 220 },
-    'MERC-REST-006': { x: 450, y: 220 },
-    'MERC-CONV-018': { x: 600, y: 220 },
-    'INFRA-VPN-SUBNET': { x: 160, y: 150 },
-    'CLUSTER-PAYERS-NORTH': { x: 220, y: 370 },
-    'CLUSTER-PAYERS-WEST': { x: 530, y: 370 },
-    'MERC-BAKE-002': { x: 770, y: 220 }
-  };
-
-  const showcaseMerchants = [
-    { id: 'MERC-BAKE-001', label: 'DEMO FRONT #1 • BAKERY', tone: 'rose' as const },
-    { id: 'MERC-REST-006', label: 'DEMO FRONT #2 • RESTAURANT', tone: 'amber' as const },
-    { id: 'MERC-CONV-018', label: 'DEMO FRONT #3 • CONVENIENCE', tone: 'amber' as const }
-  ]
-    .map(entry => ({ ...entry, merchant: merchants.find(m => m.id === entry.id) }))
-    .filter((entry): entry is typeof entry & { merchant: Merchant } => Boolean(entry.merchant));
+  const merchantCount = graphData.nodes.filter(node => node.type === 'MERCHANT').length;
 
   return (
-    <div className="space-y-12 animate-fade-in">
-      
-      {/* Editorial Header */}
-      <section className="relative pt-6 pb-2">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-white/[0.08]">
+    <div className="space-y-8 animate-fade-in">
+      <section className="pt-4 pb-2">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
           <div className="max-w-3xl space-y-3">
-            <div className="flex items-center space-x-2">
-              <span className="bf-kicker text-neutral-400">[ 03 / CONNECTED SHOPS MAP ]</span>
-              <span className="text-white/20">&bull;</span>
-              <span className="text-xs font-mono text-rose-400">NETWORK LINK CHECKER</span>
+            <div className="flex items-center gap-2">
+              <span className="bf-kicker text-neutral-400">[ 03 / SYNDICATE GRAPH ]</span>
+              <span className="text-xs font-mono text-rose-300 flex items-center gap-1">
+                <FlaskConical className="w-3 h-3" /> SIM-ONLY NODES
+              </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.08] font-sans">
-              Betting Network &amp; Connected Shops.
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
+              Simulated syndicate topology.
             </h1>
-            <p className="text-sm sm:text-base text-neutral-400 font-normal leading-relaxed max-w-2xl pt-2">
-              Online betting operators try to avoid gateway limits by spreading bets across multiple shops in unrelated categories (bakeries, restaurants, convenience stores). 
-              This interactive map connects the dots using shared internet devices and matching late-night betting times. Node risk scores are synthetic demo data.
+            <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
+              {merchantCount} <span className="font-mono">SIM-*</span> merchants, {graphData.nodes.filter(n => n.type === 'PAYER_CLUSTER').length} payer
+              clusters, one simulated hub and one simulated device pool. Real OpenStreetMap businesses are not part of
+              this graph.
             </p>
           </div>
-
-          <div className="flex items-center space-x-3 text-xs font-mono shrink-0">
+          <div className="flex items-center gap-3 text-xs font-mono shrink-0">
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-rose-300">
-              <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-              Flagged Demo Profile
+              <span className="w-2 h-2 rounded-full bg-rose-400" /> Flagged SIM node
             </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-emerald-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Safe Shop (Demo Profile)
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Control SIM node
             </span>
           </div>
         </div>
       </section>
 
-      {/* Main Canvas & Inspector Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* SVG Interactive Canvas */}
         <div className="bf-card rounded-2xl p-4 lg:col-span-2 relative overflow-hidden min-h-[500px] flex items-center justify-center bg-[#07070A]">
-          <svg className="w-full h-[470px]" viewBox="0 0 900 450">
+          <svg className="w-full h-[470px]" viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`} role="img" aria-label="Simulated syndicate graph">
             <defs>
               <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.9" />
@@ -106,275 +105,116 @@ export const SyndicateGraph: React.FC<SyndicateGraphProps> = ({
                 <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.9" />
                 <stop offset="100%" stopColor="#b45309" stopOpacity="0.9" />
               </linearGradient>
-              <marker
-                id="arrow"
-                viewBox="0 0 10 10"
-                refX="22"
-                refY="5"
-                markerWidth="6"
-                markerHeight="6"
-                orient="auto-start-reverse"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#33333d" />
-              </marker>
-              <marker
-                id="arrow-rose"
-                viewBox="0 0 10 10"
-                refX="22"
-                refY="5"
-                markerWidth="6"
-                markerHeight="6"
-                orient="auto-start-reverse"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f43f5e" />
-              </marker>
             </defs>
 
-            {/* Links / Edges */}
-            {graphData.links.map((link, idx) => {
-              const src = nodePositions[link.source];
-              const tgt = nodePositions[link.target];
-              if (!src || !tgt) return null;
-
-              const isSuspicious = link.relationship === 'FUNDS_ROUTED' || link.relationship === 'SHARED_DEVICE';
-
+            {graphData.links.map((link, index) => {
+              const source = positions[link.source];
+              const target = positions[link.target];
+              if (!source || !target) return null;
+              const suspicious = link.relationship === 'FUNDS_ROUTED' || link.relationship === 'SHARED_DEVICE';
               return (
-                <g key={idx}>
-                  <line
-                    x1={src.x}
-                    y1={src.y}
-                    x2={tgt.x}
-                    y2={tgt.y}
-                    stroke={isSuspicious ? '#f43f5e' : '#26262e'}
-                    strokeWidth={isSuspicious ? '2' : '1.5'}
-                    strokeDasharray={link.relationship === 'SHARED_DEVICE' ? '4,4' : undefined}
-                    strokeOpacity={0.7}
-                    markerEnd={isSuspicious ? 'url(#arrow-rose)' : 'url(#arrow)'}
-                  />
-                </g>
+                <line
+                  key={index}
+                  x1={source.x}
+                  y1={source.y}
+                  x2={target.x}
+                  y2={target.y}
+                  stroke={suspicious ? '#f43f5e' : '#3f3f46'}
+                  strokeWidth={suspicious ? 2 : 1.2}
+                  strokeDasharray={link.relationship === 'SHARED_DEVICE' ? '4,4' : undefined}
+                  strokeOpacity={0.65}
+                />
               );
             })}
 
-            {/* Nodes */}
             {graphData.nodes.map(node => {
-              const pos = nodePositions[node.id] || { x: 450, y: 220 };
-              const isSelected = selectedNode?.id === node.id;
+              const position = positions[node.id] ?? { x: VIEW_WIDTH / 2, y: 230 };
+              const isSelected = selected?.id === node.id;
               const isAggregator = node.type === 'SYNDICATE_AGGREGATOR';
-              const isMule = node.riskScore >= 70;
               const isSafe = node.riskScore < 30;
-
+              const fill = isAggregator ? 'url(#roseGrad)' : isSafe ? 'url(#emeraldGrad)' : 'url(#amberGrad)';
+              const badge = isAggregator
+                ? 'HUB'
+                : node.type === 'PAYER_CLUSTER'
+                  ? 'RING'
+                  : node.type === 'IP_SUBNET'
+                    ? 'DEV'
+                    : 'SIM';
               return (
                 <g
                   key={node.id}
-                  transform={`translate(${pos.x}, ${pos.y})`}
-                  className="cursor-pointer transition-transform duration-300 hover:scale-115"
-                  onClick={() => setSelectedNode(node)}
+                  transform={`translate(${position.x}, ${position.y})`}
+                  className="cursor-pointer"
+                  onClick={() => setSelected(node)}
                 >
-                  {/* Ping animation for flagged nodes */}
-                  {isMule && (
-                    <circle
-                      r="26"
-                      fill="none"
-                      stroke="#f43f5e"
-                      strokeWidth="1.5"
-                      strokeOpacity="0.4"
-                      className="animate-ping"
-                      style={{ animationDuration: '3s' }}
-                    />
-                  )}
-
-                  <circle
-                    r={isAggregator ? 24 : 18}
-                    fill={
-                      isAggregator
-                        ? 'url(#roseGrad)'
-                        : isSafe
-                        ? 'url(#emeraldGrad)'
-                        : isMule
-                        ? 'url(#roseGrad)'
-                        : 'url(#amberGrad)'
-                    }
-                    stroke={isSelected ? '#ffffff' : '#0B0B0E'}
-                    strokeWidth={isSelected ? '3' : '2'}
-                  />
-
-                  <text
-                    textAnchor="middle"
-                    dy=".3em"
-                    fill="#ffffff"
-                    fontSize={isAggregator ? '11px' : '9px'}
-                    fontWeight="bold"
-                    fontFamily="monospace"
-                  >
-                    {isAggregator ? 'HUB' : node.type === 'PAYER_CLUSTER' ? 'RING' : node.type === 'IP_SUBNET' ? 'VPN' : 'MCC'}
+                  <circle r={isAggregator ? 24 : 16} fill={fill} stroke={isSelected ? '#ffffff' : '#0B0B0E'} strokeWidth={isSelected ? 3 : 2} />
+                  <text textAnchor="middle" dy=".32em" fill="#ffffff" fontSize="9px" fontWeight="bold" fontFamily="monospace">
+                    {badge}
                   </text>
-
-                  <text
-                    y={isAggregator ? 34 : 28}
-                    textAnchor="middle"
-                    fill="#ededed"
-                    fontSize="10px"
-                    fontWeight="500"
-                    fontFamily="sans-serif"
-                    className="select-none"
-                  >
-                    {node.name.length > 22 ? node.name.substring(0, 20) + '...' : node.name}
+                  <text y={isAggregator ? 36 : 28} textAnchor="middle" fill="#ededed" fontSize="10px" fontFamily="sans-serif">
+                    {node.name.length > 24 ? `${node.name.slice(0, 22)}...` : node.name}
                   </text>
                 </g>
               );
             })}
           </svg>
-
-          {/* Interactive Hint */}
           <div className="absolute bottom-4 left-4 text-[11px] font-mono text-neutral-400 bg-neutral-900/90 px-3 py-1.5 rounded-full border border-white/[0.08] flex items-center gap-2">
-            <Info className="w-3.5 h-3.5" />
-            <span>Click any node to see links, risk scores, and shared devices</span>
+            <Info className="w-3.5 h-3.5" /> Click a node for simulated details
           </div>
         </div>
 
-        {/* Entity Inspector Panel */}
         <div className="bf-card rounded-2xl p-6 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <span className="bf-kicker">[ DETAILS PANEL ]</span>
-            </div>
-
-            {selectedNode ? (
+            <span className="bf-kicker">[ NODE INSPECTOR ]</span>
+            {selected ? (
               <div className="space-y-4">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 block">
-                    {selectedNode.type}
-                  </span>
-                  <h4 className="text-xl font-bold text-white mt-1 tracking-tight">
-                    {selectedNode.name}
-                  </h4>
-                  <p className="text-xs font-mono text-neutral-400 mt-1">{selectedNode.category}</p>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400">{selected.type}</span>
+                  <h4 className="text-lg font-bold text-white mt-1">{selected.name}</h4>
+                  <p className="text-[11px] font-mono text-neutral-400 mt-1">{selected.category}</p>
+                  <p className="text-[10px] font-mono text-rose-300 mt-1">SIMULATED RECORD · {selected.id}</p>
                 </div>
-
                 <div className="p-4 rounded-xl bg-neutral-900/60 border border-white/[0.08]">
-                  <span className="text-[10px] font-mono text-neutral-500 uppercase block mb-1">
-                    Demo Risk Assessment:
-                  </span>
-                  <div className="flex items-center space-x-3">
-                    <span className={`text-3xl font-bold font-mono ${
-                      selectedNode.riskScore >= 70 ? 'text-rose-400' : 'text-emerald-400'
-                    }`}>
-                      {selectedNode.riskScore}/100
+                  <span className="text-[10px] font-mono text-neutral-500 uppercase block mb-1">Simulated risk</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-3xl font-bold font-mono ${selected.riskScore >= 70 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                      {selected.riskScore}/100
                     </span>
-                    <span className={`text-[10px] font-mono uppercase font-bold px-2.5 py-1 rounded-full ${
-                      selectedNode.riskScore >= 70 ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'
+                    <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full ${
+                      selected.riskScore >= 70 ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'
                     }`}>
-                      {selectedNode.riskScore >= 70 ? 'Flagged Demo Profile' : 'Safe Shop (Demo Profile)'}
+                      {selected.riskScore >= 70 ? 'Flagged SIM node' : 'Control SIM node'}
                     </span>
                   </div>
                 </div>
-
-                <div>
-                  <span className="text-xs font-semibold text-neutral-300 block mb-1.5">
-                    Behavior Summary:
-                  </span>
-                  <p className="text-xs text-neutral-300 leading-relaxed bg-neutral-950 p-4 rounded-xl border border-white/[0.06]">
-                    {selectedNode.details}
-                  </p>
-                </div>
-
-                {selectedNode.type === 'MERCHANT' && (
+                <p className="text-xs text-neutral-300 leading-relaxed bg-neutral-950 p-4 rounded-xl border border-white/[0.06]">
+                  {selected.details}
+                </p>
+                {selected.type === 'MERCHANT' && simulatedMerchants.some(m => m.id === selected.id) && (
                   <button
-                    onClick={() => onSelectMerchantForAI(selectedNode.id)}
+                    onClick={() => onSelectMerchantForAI(selected.id)}
                     className="w-full bf-pill-btn bf-pill-btn-primary text-xs py-2.5 flex items-center justify-center gap-2"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Run Gemini AI Investigation</span>
+                    <ExternalLink className="w-3.5 h-3.5" /> Run simulated investigation
                   </button>
                 )}
               </div>
             ) : (
               <div className="py-16 text-center text-neutral-500 text-xs space-y-3">
                 <Radio className="w-8 h-8 text-neutral-600 mx-auto animate-pulse" />
-                <p>Click on any node on the map to see its connections, money flow, and shared devices.</p>
+                <p>Select a node to see its simulated edges and risk score.</p>
               </div>
             )}
           </div>
-
           <div className="pt-4 border-t border-white/[0.08] text-[11px] text-neutral-400 space-y-1">
-            <span className="font-semibold text-neutral-300 block font-mono uppercase text-[10px]">
-              How Demo Mule Networks Work:
-            </span>
+            <span className="font-semibold text-neutral-300 block font-mono uppercase text-[10px]">Graph scope</span>
             <p className="leading-relaxed">
-              In this synthetic scenario, betting organizers spread bets across unrelated real shops (a bakery, a restaurant, and a convenience store) so that no single merchant crosses the gateway&apos;s alert limit.
+              Nodes come from <span className="font-mono">GET /api/syndicate/graph</span>. The backend builds the graph from
+              the SIM catalogue only, so no real OSM identity can appear here.
             </p>
           </div>
         </div>
-
       </section>
-
-      {/* Visual Showcase: Demo fronts from the synthetic ring */}
-      <section className="space-y-4">
-        <div>
-          <span className="bf-kicker">[ 04 / CONNECTED DEMO PROFILES ]</span>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1">
-            Real Shops Cast as Cover Businesses
-          </h2>
-          <p className="text-xs text-neutral-400 mt-1 max-w-2xl leading-relaxed">
-            These are real OpenStreetMap businesses in Bengaluru. Their inclusion in this betting-ring narrative is a synthetic demo scenario &mdash; no fraud is alleged against the actual merchants.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {showcaseMerchants.map(({ merchant, label, tone }) => (
-            <div 
-              key={merchant.id}
-              onClick={() => onSelectMerchantForAI(merchant.id)}
-              className="bf-media-card group cursor-pointer flex flex-col justify-between"
-            >
-              <div className="relative h-44 w-full overflow-hidden">
-                <img 
-                  src={getMerchantImage(merchant)} 
-                  alt={merchant.name}
-                  className="w-full h-full object-cover brightness-[0.7] group-hover:brightness-[0.85]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0E] via-[#0B0B0E]/40 to-transparent" />
-                <div className="absolute top-3 left-3">
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border ${
-                    tone === 'rose'
-                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                      : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  }`}>
-                    {label}
-                  </span>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <span className="text-[10px] font-mono font-bold text-neutral-200 bg-black/60 px-2 py-0.5 rounded-full border border-white/10">
-                    OSM {merchant.osmRef || merchant.osmId}
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h4 className="text-base font-bold text-white group-hover:text-rose-300 transition-colors">
-                    {merchant.name}
-                  </h4>
-                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                    {merchant.city}, {merchant.state} &bull; ₹{(merchant.metrics.totalVolume30d / 100000).toFixed(1)}L/month
-                  </p>
-                  <p className="text-xs text-neutral-300 mt-2 line-clamp-2">
-                    {merchant.riskFactors[0] || SYNTHETIC_RISK_BADGE}
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-neutral-400">
-                  <span className={tone === 'rose' ? 'text-rose-400' : 'text-amber-400'}>
-                    Demo risk: {merchant.driftScore}/100
-                  </span>
-                  <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    Inspect <ArrowRight className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
     </div>
   );
 };

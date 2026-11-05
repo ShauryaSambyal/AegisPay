@@ -1,72 +1,134 @@
+/**
+ * Shared API types.
+ *
+ * The real/simulated boundary is enforced by the type system, not by comments:
+ *
+ *  - `RealMerchant` has NO risk-bearing field at all. If a real merchant could
+ *    carry a score, the boundary would already be broken.
+ *  - `SimulatedMerchant.id` is a `SimMerchantId` (`SIM-*`) and every financial
+ *    or risk record references `SimMerchantId`, never `string`.
+ *  - The two id types are disjoint template-literal types, so passing a real
+ *    merchant id where a simulated id is required is a compile error.
+ */
+
+export type DataOrigin = 'real_osm' | 'simulated';
+
+/** Real OpenStreetMap identity id, e.g. `OSM-N343089650`. */
+export type RealMerchantId = `OSM-${string}`;
+
+/** Anonymized simulation identity id, e.g. `SIM-0001`. */
+export type SimMerchantId = `SIM-${string}`;
+
 export type MerchantStatus = 'ACTIVE' | 'UNDER_REVIEW' | 'RESTRICTED' | 'SUSPENDED';
 
-export type RiskTier = 
-  | 'TIER_0_SAFE'        // Score 0-25: Normal business, zero friction
-  | 'TIER_1_MONITOR'     // Score 26-55: Subtle shift / seasonal, soft friction / invoice itemization prompt
-  | 'TIER_2_RESTRICT'    // Score 56-80: Suspected front, 20% rolling reserve, velocity cap, video POS audit
-  | 'TIER_3_QUARANTINE'; // Score 81-100: Confirmed syndicate, STR filing, payment gateway hold
+export type RiskTier =
+  | 'TIER_0_SAFE'        // 0-25: normal business, zero friction
+  | 'TIER_1_MONITOR'     // 26-55: subtle shift, soft friction
+  | 'TIER_2_RESTRICT'    // 56-80: 20% rolling reserve, velocity cap
+  | 'TIER_3_QUARANTINE'; // 81-100: payout hold, manual review
 
-export interface Merchant {
-  id: string;
+export type RealMerchantCategory =
+  | 'bakery'
+  | 'restaurant'
+  | 'cafe'
+  | 'grocery'
+  | 'pharmacy'
+  | 'electronics'
+  | 'clothing'
+  | 'hotel'
+  | 'convenience';
+
+/** A real business identity from OpenStreetMap. Display-only directory record. */
+export interface RealMerchant {
+  id: RealMerchantId;
+  dataOrigin: 'real_osm';
+  osmType: 'node' | 'way' | 'relation';
+  osmId: number;
+  osmRef: string;
   name: string;
-  legalEntity: string;
-  mcc: string; // e.g. 5462 - Bakeries
-  mccDescription: string;
-  panNumber: string;
-  gstin: string;
-  onboardedAt: string;
-  declaredTurnoverMonthly: number;
-  city: string;
-  state: string;
-  physicalStoreVerified: boolean;
-  status: MerchantStatus;
-  currentTier: RiskTier;
-  driftScore: number; // 0 - 100
-  isBettingFront: boolean;
-  riskFactors: string[];
-  // --- OpenStreetMap provenance (real merchant identity) ---
-  osmId?: number;
-  osmType?: string;
-  osmRef?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  phone?: string;
-  website?: string;
-  openingHours?: string;
-  dataSource?: 'OpenStreetMap';
-  /** Synthetic demo risk archetype layered on top of the real OSM identity. */
-  riskProfile?: 'SAFE' | 'MONITOR' | 'RESTRICT' | 'QUARANTINE';
-  metrics: {
-    totalVolume30d: number;
-    transactionCount30d: number;
-    avgTicketSize: number;
-    outOfStateRatio: number; // 0 - 1
-    nightTimeRatio: number; // 22:00 - 04:00 ratio
-    roundAmountRatio: number; // multiples of 500, 1000, 5000
-    repeatPayerRatio: number; // repeat customer %
-    matchHourSpikeRatio: number; // IPL / cricket match correlation
-  };
-  interventions: {
-    rollingReservePercent: number;
-    maxTransactionLimit: number;
-    smartGeoFenceActive: boolean;
-    videoPosRequested: boolean;
-    strFiled: boolean;
-  };
+  category: string;
+  categoryLabel: string;
+  address: string;
+  postcode?: string;
+  latitude: number;
+  longitude: number;
+  source: 'OpenStreetMap';
+  license: 'ODbL-1.0';
+  attribution: '© OpenStreetMap contributors';
+  displayOnly: true;
 }
 
+/** Onboarding baseline used by the drift engine (simulated merchants only). */
+export interface SimBaseline {
+  avgTicket: number;
+  nightShare: number;
+  roundShare: number;
+  repeatPayerShare: number;
+  sampledDays: number;
+  source: 'onboarding_90d' | 'category_fallback';
+}
+
+export interface SimulatorMetrics {
+  totalVolume30d: number;
+  transactionCount30d: number;
+  avgTicketSize: number;
+  outOfStateRatio: number;
+  nightTimeRatio: number;
+  roundAmountRatio: number;
+  repeatPayerRatio: number;
+  matchHourSpikeRatio: number;
+}
+
+export interface SimInterventions {
+  rollingReservePercent: number;
+  maxTransactionLimit: number;
+  smartGeoFenceActive: boolean;
+  videoPosRequested: boolean;
+  strFiled: boolean;
+}
+
+/** An anonymized simulated merchant. Every risk-bearing record uses this type. */
+export interface SimulatedMerchant {
+  id: SimMerchantId;
+  dataOrigin: 'simulated';
+  displayName: string;
+  category: string;
+  categoryLabel: string;
+  mcc: string;
+  mccDescription: string;
+  city: string;
+  state: string;
+  declaredTurnoverMonthly: number;
+  onboardedAt: string;
+  status: MerchantStatus;
+  riskScore: number;
+  riskTier: RiskTier;
+  driftScore: number;
+  isBettingFront: boolean;
+  network: string | null;
+  baseline: SimBaseline;
+  metrics: SimulatorMetrics;
+  riskFactors: string[];
+  interventions: SimInterventions;
+}
+
+export type Merchant = RealMerchant | SimulatedMerchant;
+
+export type PaymentMethod = 'UPI' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'NET_BANKING';
+
+/** Simulated payment. `merchantId` is a SIM id, so real merchants cannot hold one. */
 export interface Transaction {
   id: string;
-  merchantId: string;
+  dataOrigin: 'simulated';
+  merchantId: SimMerchantId;
   merchantName: string;
   amount: number;
   currency: string;
-  paymentMethod: 'UPI' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'NET_BANKING';
+  paymentMethod: PaymentMethod;
   payerId: string;
-  payerState: string;
   payerCity: string;
-  timestamp: string; // ISO string
+  payerState: string;
+  timestamp: string;
   isRoundAmount: boolean;
   isNightTime: boolean;
   isMatchWindow: boolean;
@@ -74,49 +136,47 @@ export interface Transaction {
   anomalyFlags: string[];
 }
 
+export interface DriftComponents {
+  temporalAnomaly: { score: number; weight: number; detail: string; peakHours: string[] };
+  geographicEntropy: {
+    score: number;
+    weight: number;
+    detail: string;
+    topPayerRegions: { region: string; count: number }[];
+  };
+  amountDistribution: { score: number; weight: number; detail: string; roundNumberPct: number };
+  payerEntropy: { score: number; weight: number; detail: string; oneOffPayerPct: number };
+  baselineDeviation: { score: number; weight: number; detail: string; baselineSource: SimBaseline['source'] };
+}
+
 export interface DriftBreakdown {
-  merchantId: string;
+  dataOrigin: 'simulated';
+  merchantId: SimMerchantId;
   compositeScore: number;
   tier: RiskTier;
-  components: {
-    temporalAnomaly: {
-      score: number;
-      weight: number;
-      detail: string;
-      peakHours: string[];
-    };
-    geographicEntropy: {
-      score: number;
-      weight: number;
-      detail: string;
-      topPayerRegions: { region: string; count: number }[];
-    };
-    amountDistribution: {
-      score: number;
-      weight: number;
-      detail: string;
-      roundNumberPct: number;
-    };
-    payerEntropy: {
-      score: number;
-      weight: number;
-      detail: string;
-      oneOffPayerPct: number;
-    };
-    digitalFootprint: {
-      score: number;
-      weight: number;
-      detail: string;
-      webCatalogActive: boolean;
-      mapsReviewVolume: number;
-    };
-  };
+  components: DriftComponents;
   recommendedAction: string;
   falsePositiveSafetyAssessment: string;
 }
 
+/** A risk assessment record; only simulated merchants can be assessed. */
+export interface RiskAssessment {
+  dataOrigin: 'simulated';
+  merchantId: SimMerchantId;
+  score: number;
+  tier: RiskTier;
+  reasons: string[];
+  components: Record<string, number>;
+  computedAt: string;
+  coldStart: boolean;
+}
+
+export type SyndicateInfraId = `CLUSTER-${string}` | `HUB-${string}` | `INFRA-${string}`;
+export type SyndicateNodeId = SimMerchantId | SyndicateInfraId;
+
 export interface SyndicateNode {
-  id: string;
+  id: SyndicateNodeId;
+  dataOrigin: 'simulated';
   name: string;
   type: 'MERCHANT' | 'PAYER_CLUSTER' | 'SYNDICATE_AGGREGATOR' | 'IP_SUBNET';
   riskScore: number;
@@ -125,19 +185,21 @@ export interface SyndicateNode {
 }
 
 export interface SyndicateLink {
-  source: string;
-  target: string;
-  value: number; // transaction count or flow volume
+  source: SyndicateNodeId;
+  target: SyndicateNodeId;
+  value: number;
   relationship: 'FUNDS_ROUTED' | 'SHARED_DEVICE' | 'COMMON_PAYER_CLUSTER' | 'BURST_SYNCHRONIZED';
 }
 
 export interface SyndicateGraph {
+  dataOrigin: 'simulated';
   nodes: SyndicateNode[];
   links: SyndicateLink[];
 }
 
 export interface AIInvestigationReport {
-  merchantId: string;
+  dataOrigin: 'simulated';
+  merchantId: SimMerchantId;
   merchantName: string;
   investigationDate: string;
   executiveSummary: string;
@@ -154,4 +216,13 @@ export interface AIInvestigationReport {
     statutoryViolations: string[];
   };
   actionableRemediations: string[];
+}
+
+/** Standard error envelope for every API error response. */
+export interface ApiErrorBody {
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
 }

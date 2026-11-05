@@ -1,401 +1,177 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Bot, 
-  Sparkles, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Copy, 
-  Check, 
-  FileText, 
-  ShieldCheck, 
-  ArrowRight,
-  Gavel,
-  Scale,
-  ChevronDown
-} from 'lucide-react';
-import { Merchant, AIInvestigationReport } from '../types';
+import React from 'react';
+import { Bot, FileText, FlaskConical, ShieldAlert, Sparkles } from 'lucide-react';
+import { AIInvestigationReport, SimulatedMerchant } from '../types';
+import { tierClasses, tierLabel } from '../merchantVisuals';
 
 interface AIForensicInspectorProps {
-  merchants: Merchant[];
+  simulatedMerchants: SimulatedMerchant[];
   selectedMerchantId: string;
-  onSelectMerchant: (id: string) => void;
+  onSelectMerchant: (merchantId: string) => void;
   report: AIInvestigationReport | null;
   isLoading: boolean;
-  onRunInvestigation: (id: string) => void;
+  onRunInvestigation: (merchantId: string) => void;
 }
 
+const severityClasses: Record<string, string> = {
+  CRITICAL: 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+  HIGH: 'border-amber-500/40 bg-amber-500/10 text-amber-200',
+  MEDIUM: 'border-sky-500/40 bg-sky-500/10 text-sky-200',
+  LOW: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
+};
+
 export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
-  merchants,
+  simulatedMerchants,
   selectedMerchantId,
   onSelectMerchant,
   report,
   isLoading,
-  onRunInvestigation
+  onRunInvestigation,
 }) => {
-  const [copied, setCopied] = useState(false);
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-  const selectorRef = useRef<HTMLDivElement>(null);
-
-  const selectedMerchant = merchants.find(m => m.id === selectedMerchantId);
-
-  // Close shop selector on outside click or escape key
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (selectorRef.current && !selectorRef.current.contains(event.target as Node)) {
-        setIsSelectorOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsSelectorOpen(false);
-      }
-    };
-
-    if (isSelectorOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isSelectorOpen]);
-
-  const handleCopy = () => {
-    if (!report) return;
-    const textToCopy = `=== SUSPICIOUS TRANSACTION REPORT (STR) DOSSIER ===
-Subject: ${report.merchantName} (ID: ${report.merchantId})
-Date: ${report.investigationDate}
-Verdict: ${report.driftVerdict}
-Confidence Score: ${report.confidenceScore}%
-
-EXECUTIVE SUMMARY:
-${report.executiveSummary}
-
-FIU CATEGORY:
-${report.regulatoryDossier.fiuSuspiciousCategory}
-
-STATUTORY NARRATIVE:
-${report.regulatoryDossier.narrative}
-
-STATUTORY VIOLATIONS:
-${report.regulatoryDossier.statutoryViolations.map(v => `- ${v}`).join('\n')}
-
-ACTIONABLE REMEDIATIONS:
-${report.actionableRemediations.map((a, i) => `${i + 1}. ${a}`).join('\n')}
-`;
-    navigator.clipboard.writeText(textToCopy);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
+  const selected = simulatedMerchants.find(merchant => merchant.id === selectedMerchantId) ?? simulatedMerchants[0];
 
   return (
-    <div className="space-y-12 animate-fade-in">
-      
-      {/* Editorial Header */}
-      <section className="relative pt-6 pb-2">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-white/[0.08]">
-          <div className="max-w-3xl space-y-3">
-            <div className="flex items-center space-x-2">
-              <span className="bf-kicker text-neutral-400">[ 05 / AI DEEP CHECK &amp; EVIDENCE ]</span>
-              <span className="text-white/20">&bull;</span>
-              <span className="text-xs font-mono text-emerald-400">GOOGLE GEMINI AUDITOR</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.08] font-sans">
-              AI Store Investigation &amp; Bank Report.
-            </h1>
-            <p className="text-sm sm:text-base text-neutral-400 font-normal leading-relaxed max-w-2xl pt-2">
-              Powered by Google Gemini. Evaluates unusual payment patterns, checks legal rules, and drafts a ready-to-file official report for payment compliance officers.
-            </p>
+    <div className="space-y-8 animate-fade-in">
+      <section className="pt-4 pb-2">
+        <div className="pb-6 border-b border-white/[0.08] space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="bf-kicker text-neutral-400">[ 06 / SIMULATED INVESTIGATION ]</span>
+            <span className="text-xs font-mono text-rose-300 flex items-center gap-1">
+              <FlaskConical className="w-3 h-3" /> FICTIONAL MERCHANT
+            </span>
           </div>
-
-          {/* Merchant Selector & Audit Trigger */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <div className="relative w-full sm:w-64" ref={selectorRef}>
-              <button
-                type="button"
-                onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-                className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl text-xs font-mono transition-all duration-200 border ${
-                  isSelectorOpen
-                    ? 'bg-white text-black border-white shadow-lg shadow-white/10'
-                    : 'bg-white/[0.05] hover:bg-white/[0.1] text-white border-white/15 hover:border-white/30'
-                }`}
-                aria-expanded={isSelectorOpen}
-                aria-label="Select a shop to investigate"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`text-[10px] uppercase tracking-widest hidden sm:inline shrink-0 ${isSelectorOpen ? 'text-neutral-600' : 'text-neutral-500'}`}>
-                    Shop
-                  </span>
-                  <span className="font-semibold tracking-tight truncate">
-                    {selectedMerchant?.name || 'Select a shop'}
-                  </span>
-                </div>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-300 ml-0.5 ${
-                    isSelectorOpen ? 'rotate-180 text-black' : 'text-neutral-400'
-                  }`}
-                />
-              </button>
-
-              {/* Shop Selector Popover */}
-              {isSelectorOpen && (
-                <div className="absolute left-0 lg:left-auto lg:right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-[#09090C]/95 backdrop-blur-2xl border border-white/15 shadow-2xl shadow-black/90 p-2 z-50 animate-dropdown-enter ring-1 ring-white/10">
-                  
-                  {/* Header bar */}
-                  <div className="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400">
-                      SHOPS &bull; {merchants.length} LISTED
-                    </span>
-                    <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                      READY
-                    </span>
-                  </div>
-
-                  {/* Shop List */}
-                  <div className="py-1.5 space-y-1 max-h-72 overflow-y-auto">
-                    {merchants.map((m) => {
-                      const isActive = selectedMerchantId === m.id;
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => {
-                            onSelectMerchant(m.id);
-                            setIsSelectorOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left transition-all duration-200 ${
-                            isActive
-                              ? 'bg-white text-black font-semibold shadow-md'
-                              : 'hover:bg-white/[0.07] text-neutral-300 hover:text-white'
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <span className={`text-xs tracking-tight block truncate ${isActive ? 'text-black font-semibold' : 'text-white'}`}>
-                              {m.name}
-                            </span>
-                            <p className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                              {m.city}, {m.state} &bull; {m.isBettingFront ? 'Demo risk profile' : 'Safe (demo profile)'}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center space-x-2 shrink-0 ml-2">
-                            <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
-                              m.isBettingFront
-                                ? isActive
-                                  ? 'border-rose-600/30 bg-rose-600/10 text-rose-700 font-semibold'
-                                  : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
-                                : isActive
-                                  ? 'border-emerald-600/30 bg-emerald-600/10 text-emerald-700 font-semibold'
-                                  : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                            }`}>
-                              {m.isBettingFront ? 'RISK' : 'SAFE'}
-                            </span>
-                            {isActive && (
-                              <Check className="w-4 h-4 text-black shrink-0" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => onRunInvestigation(selectedMerchantId)}
-              disabled={isLoading}
-              className="bf-pill-btn bf-pill-btn-primary text-xs py-2.5 px-5 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  <span>Checking with AI...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Run AI Check</span>
-                </>
-              )}
-            </button>
-          </div>
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
+            Investigation note for a simulated merchant.
+          </h1>
+          <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
+            Reports are generated for <span className="font-mono">SIM-*</span> merchants with fictional names. The
+            narrative is a demo artefact, not a finding about any real business. Without a Gemini key the deterministic
+            report engine is used.
+          </p>
         </div>
       </section>
 
-      {/* Report Display */}
-      {report ? (
-        <div className="space-y-6">
-          
-          {/* Main Verdict Card */}
-          <div className={`bf-card rounded-2xl p-6 sm:p-8 border transition-all ${
-            report.driftVerdict === 'CONFIRMED_BETTING_FRONT'
-              ? 'border-rose-500/40 bg-[#0E0A0C]'
-              : report.driftVerdict === 'GENUINE_SEASONAL_SURGE'
-              ? 'border-emerald-500/40 bg-[#0A0E0C]'
-              : 'border-amber-500/40 bg-[#0E0C0A]'
-          }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start space-x-4">
-                <div className={`p-3.5 rounded-2xl shrink-0 ${
-                  report.driftVerdict === 'CONFIRMED_BETTING_FRONT' ? 'bg-rose-500/20 text-rose-400' :
-                  report.driftVerdict === 'GENUINE_SEASONAL_SURGE' ? 'bg-emerald-500/20 text-emerald-400' :
-                  'bg-amber-500/20 text-amber-400'
-                }`}>
-                  {report.driftVerdict === 'CONFIRMED_BETTING_FRONT' ? (
-                    <AlertTriangle className="w-6 h-6" />
-                  ) : report.driftVerdict === 'GENUINE_SEASONAL_SURGE' ? (
-                    <ShieldCheck className="w-6 h-6" />
-                  ) : (
-                    <Scale className="w-6 h-6" />
-                  )}
-                </div>
-
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 block">
-                    CASE ID: AUD-{report.merchantId}-{report.investigationDate}
-                  </span>
-                  <h3 className="text-2xl font-bold text-white tracking-tight mt-0.5">
-                    {report.merchantName}
-                  </h3>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className={`text-[10px] uppercase font-mono font-bold px-3 py-1 rounded-full border ${
-                      report.driftVerdict === 'CONFIRMED_BETTING_FRONT' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
-                      report.driftVerdict === 'GENUINE_SEASONAL_SURGE' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
-                      'bg-amber-500/20 text-amber-300 border-amber-500/40'
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bf-card rounded-2xl p-4 space-y-2">
+          <span className="bf-kicker px-1">[ SIM MERCHANTS ]</span>
+          <div className="max-h-[520px] overflow-y-auto space-y-1 pr-1">
+            {simulatedMerchants.map(merchant => {
+              const isActive = merchant.id === selected?.id;
+              return (
+                <button
+                  key={merchant.id}
+                  onClick={() => onSelectMerchant(merchant.id)}
+                  className={`w-full text-left p-2.5 rounded-xl border transition-all ${
+                    isActive ? 'bg-white text-black border-white' : 'bg-neutral-900/50 border-white/[0.06] hover:border-white/20 text-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold truncate">{merchant.displayName}</span>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full shrink-0 ${
+                      isActive ? 'bg-black/10 text-black' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                     }`}>
-                      {report.driftVerdict === 'CONFIRMED_BETTING_FRONT' ? 'Demo: Confirmed Betting Front' :
-                       report.driftVerdict === 'GENUINE_SEASONAL_SURGE' ? 'Genuine Surge (Safe)' :
-                       report.driftVerdict.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-xs text-neutral-400 font-mono">
-                      AI Certainty: <strong className="text-white">{report.confidenceScore}%</strong>
+                      {merchant.riskScore}
                     </span>
                   </div>
+                  <p className={`text-[10px] font-mono mt-0.5 ${isActive ? 'text-neutral-700' : 'text-neutral-500'}`}>
+                    {merchant.id} · {merchant.categoryLabel}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 space-y-4">
+          {selected && (
+            <div className="bf-card rounded-2xl p-5 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-white">{selected.displayName}</h2>
+                  <p className="text-[11px] font-mono text-neutral-400">
+                    {selected.id} · {selected.mccDescription} · {selected.city}, {selected.state}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-mono px-2.5 py-1 rounded-full border ${tierClasses(selected.riskTier)}`}>
+                    {tierLabel(selected.riskTier)}
+                  </span>
+                  <button
+                    onClick={() => onRunInvestigation(selected.id)}
+                    disabled={isLoading}
+                    className="bf-pill-btn bf-pill-btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5 disabled:opacity-40"
+                  >
+                    <Bot className="w-3.5 h-3.5" /> {isLoading ? 'Generating...' : 'Generate report'}
+                  </button>
                 </div>
               </div>
-
-              <button
-                onClick={handleCopy}
-                className="bf-pill-btn flex items-center space-x-2 text-xs self-start sm:self-auto shrink-0"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied Report!' : 'Copy Bank Report'}</span>
-              </button>
+              <p className="text-[11px] text-neutral-400">
+                Rule-based drift score: <span className="font-mono text-white">{selected.riskScore}/100</span> ·
+                baseline source: <span className="font-mono">{selected.baseline.source}</span>
+              </p>
             </div>
+          )}
 
-            <div className="mt-6 pt-6 border-t border-white/[0.08] text-xs text-neutral-200 leading-relaxed font-sans space-y-1">
-              <span className="text-[10px] font-mono uppercase text-neutral-400 font-bold block">
-                Executive Summary (Plain English):
-              </span>
-              <p className="text-sm leading-relaxed">{report.executiveSummary}</p>
-            </div>
-          </div>
-
-          {/* Evidence Grid */}
-          <div className="bf-card rounded-2xl p-6 sm:p-8 space-y-4">
-            <span className="bf-kicker">[ EVIDENCE FOUND ]</span>
-            <h4 className="text-lg font-bold text-white tracking-tight">
-              Unusual Activity &amp; Patterns Found
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {report.evidenceItems.map((item, idx) => {
-                const isCrit = item.severity === 'CRITICAL';
-                const isHigh = item.severity === 'HIGH';
-                const isMed = item.severity === 'MEDIUM';
-
-                return (
-                  <div
-                    key={idx}
-                    className="p-5 rounded-xl bg-neutral-900/50 border border-white/[0.06] flex flex-col justify-between space-y-3"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-bold text-white">{item.title}</span>
-                        <span className={`text-[9px] uppercase font-mono font-bold px-2 py-0.5 rounded-full border ${
-                          isCrit ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' :
-                          isHigh ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
-                          isMed ? 'bg-sky-500/20 text-sky-300 border-sky-500/30' :
-                          'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        }`}>
-                          {item.severity}
-                        </span>
-                      </div>
-                      <p className="text-xs text-neutral-300 leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Regulatory STR Draft for FIU-IND */}
-          <div className="bf-card rounded-2xl p-6 sm:p-8 space-y-4">
-            <span className="bf-kicker text-amber-400">[ OFFICIAL BANK REPORT DRAFT ]</span>
-            <h4 className="text-lg font-bold text-white tracking-tight">
-              Official Bank Filing Report (FIU-IND Draft)
-            </h4>
-
-            <div className="bg-neutral-950 p-5 rounded-xl border border-white/[0.08] space-y-4 font-mono text-xs">
-              <div>
-                <span className="text-neutral-500 block text-[10px] uppercase">Suspicious Activity Category:</span>
-                <span className="text-amber-300 font-semibold">{report.regulatoryDossier.fiuSuspiciousCategory}</span>
-              </div>
-
-              <div>
-                <span className="text-neutral-500 block text-[10px] uppercase">Official Statement:</span>
-                <p className="text-neutral-300 font-sans leading-relaxed text-xs mt-1">
-                  {report.regulatoryDossier.narrative}
+          {report ? (
+            <div className="space-y-4">
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="bf-kicker">[ EXECUTIVE SUMMARY ]</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300">
+                    {report.driftVerdict.split('_').join(' ')}
+                  </span>
+                </div>
+                <p className="text-sm text-neutral-200 leading-relaxed">{report.executiveSummary}</p>
+                <p className="text-[10px] font-mono text-neutral-500">
+                  {report.merchantId} · confidence {report.confidenceScore}/100 · simulated data only
                 </p>
               </div>
 
-              {report.regulatoryDossier.statutoryViolations.length > 0 && (
-                <div>
-                  <span className="text-neutral-500 block text-[10px] uppercase mb-1">Laws Broken / Relevant Rules:</span>
-                  <ul className="space-y-1 font-sans text-xs text-rose-300/90 list-disc list-inside">
-                    {report.regulatoryDossier.statutoryViolations.map((v, idx) => (
-                      <li key={idx}>{v}</li>
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <span className="bf-kicker flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-300" /> [ SIMULATED EVIDENCE ]
+                </span>
+                <div className="space-y-2">
+                  {report.evidenceItems.map((item, index) => (
+                    <div key={index} className={`p-3 rounded-xl border ${severityClasses[item.severity] ?? severityClasses.LOW}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold">{item.title}</span>
+                        <span className="text-[9px] font-mono uppercase">{item.severity}</span>
+                      </div>
+                      <p className="text-[11px] mt-1 leading-relaxed opacity-90">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <span className="bf-kicker flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> [ DOSSIER &amp; NEXT STEPS ]
+                </span>
+                <p className="text-xs text-neutral-300 leading-relaxed">{report.regulatoryDossier.narrative}</p>
+                {report.regulatoryDossier.statutoryViolations.length > 0 && (
+                  <ul className="text-[11px] text-neutral-400 list-disc pl-4 space-y-0.5">
+                    {report.regulatoryDossier.statutoryViolations.map((item, index) => (
+                      <li key={index}>{item}</li>
                     ))}
                   </ul>
-                </div>
-              )}
+                )}
+                <ul className="text-[11px] text-neutral-200 space-y-1">
+                  {report.actionableRemediations.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <Sparkles className="w-3 h-3 mt-0.5 text-emerald-400 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-
-          {/* Actionable Remediations */}
-          <div className="bf-card rounded-2xl p-6 sm:p-8 space-y-4">
-            <span className="bf-kicker text-emerald-400">[ NEXT STEPS ]</span>
-            <h4 className="text-lg font-bold text-white tracking-tight">
-              Recommended Fair Actions
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              {report.actionableRemediations.map((action, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-neutral-900/50 border border-white/[0.06] flex items-start space-x-3">
-                  <span className="font-mono text-emerald-400 font-bold shrink-0">0{idx + 1}.</span>
-                  <span className="text-neutral-300 leading-relaxed">{action}</span>
-                </div>
-              ))}
+          ) : (
+            <div className="bf-card rounded-2xl p-10 text-center text-neutral-500 text-xs font-mono">
+              {isLoading ? 'Generating simulated report...' : 'Select a SIM merchant and generate a simulated report.'}
             </div>
-          </div>
-
+          )}
         </div>
-      ) : (
-        <div className="bf-card rounded-2xl p-16 text-center text-neutral-400 space-y-4">
-          <Bot className="w-12 h-12 text-neutral-600 mx-auto animate-pulse" />
-          <h3 className="text-lg font-bold text-white">No AI Investigation Run Yet</h3>
-          <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-            Choose a shop above and click &ldquo;Run AI Check&rdquo; to have Gemini analyze payment timing, payer locations, and draft an official bank report.
-          </p>
-        </div>
-      )}
-
+      </div>
     </div>
   );
 };
