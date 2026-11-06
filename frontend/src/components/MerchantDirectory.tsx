@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, ShieldCheck, Sliders, Info, MapPin } from 'lucide-react';
+import { Search, ShieldCheck, Sliders, MapPin } from 'lucide-react';
 import { RealMerchant, RiskTier, SimulatedMerchant } from '../types';
 import { getMerchantImage, REAL_OSM_BADGE, SIMULATED_BADGE, tierClasses, tierLabel } from '../merchantVisuals';
 
@@ -111,15 +111,6 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                 {category}
               </button>
             ))}
-          </div>
-
-          <div className="p-4 rounded-xl border border-sky-500/30 bg-sky-500/10 text-xs text-sky-200 flex items-start gap-2">
-            <Info className="w-4 h-4 shrink-0 mt-0.5" />
-            <p>
-              These are real businesses published on OpenStreetMap (ODbL-1.0, © OpenStreetMap contributors).
-              This tab shows identity data only: no risk score, tier, drift metric, transaction, fraud label or
-              intervention exists for these records anywhere in the system.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

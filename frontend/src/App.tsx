@@ -302,6 +302,7 @@ export const App: React.FC = () => {
             {activeTab === 'ai-investigator' && (
               <AIForensicInspector
                 simulatedMerchants={simulatedMerchants}
+                realMerchants={realMerchants}
                 selectedMerchantId={selectedMerchantId}
                 onSelectMerchant={setSelectedMerchantId}
                 report={aiReport}

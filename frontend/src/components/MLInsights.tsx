@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   AlertOctagon,
   AlertTriangle,
   Building2,
+  Check,
   CheckCircle2,
+  ChevronDown,
   Cpu,
   Database,
   Flame,
   HelpCircle,
   RefreshCw,
+  Search,
   ShieldAlert,
   ShieldCheck,
   Sliders,
@@ -16,6 +19,7 @@ import {
   WifiOff,
   Zap,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchMlDatasets, predictBusinessOutcome } from '../api';
 import {
   MerchantScoreResponse,
@@ -141,6 +145,82 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
   const [score, setScore] = useState<MerchantScoreResponse | null>(null);
   const [isScoring, setIsScoring] = useState(false);
   const [scoreError, setScoreError] = useState<string | null>(null);
+
+  // Custom Dropdowns State (matching tabs dropdown)
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [businessDropdownOpen, setBusinessDropdownOpen] = useState(false);
+  const [businessFilterSource, setBusinessFilterSource] = useState<'ALL' | 'SIM' | 'OSM'>('ALL');
+  const [businessSearchQuery, setBusinessSearchQuery] = useState('');
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const businessDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
+        setCategoryDropdownOpen(false);
+      }
+      if (businessDropdownRef.current && !businessDropdownRef.current.contains(e.target as Node)) {
+        setBusinessDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setCategoryDropdownOpen(false);
+        setBusinessDropdownOpen(false);
+      }
+    };
+    if (categoryDropdownOpen || businessDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [categoryDropdownOpen, businessDropdownOpen]);
+
+  const filteredCatalogMerchants = useMemo(() => {
+    const q = businessSearchQuery.toLowerCase().trim();
+    const items: Array<{
+      id: string;
+      displayName: string;
+      categoryLabel: string;
+      subtitle: string;
+      isReal: boolean;
+      riskScore?: number;
+    }> = [];
+
+    if (businessFilterSource === 'ALL' || businessFilterSource === 'SIM') {
+      simulatedMerchants.forEach(m => {
+        if (!q || m.displayName.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || m.categoryLabel.toLowerCase().includes(q)) {
+          items.push({
+            id: m.id,
+            displayName: m.displayName,
+            categoryLabel: m.categoryLabel,
+            subtitle: `${m.city}, ${m.state} · Prior Risk: ${m.riskScore}/100`,
+            isReal: false,
+            riskScore: m.riskScore,
+          });
+        }
+      });
+    }
+
+    if (businessFilterSource === 'ALL' || businessFilterSource === 'OSM') {
+      realMerchants.forEach(m => {
+        if (!q || m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || m.categoryLabel.toLowerCase().includes(q) || (m.address && m.address.toLowerCase().includes(q))) {
+          items.push({
+            id: m.id,
+            displayName: m.name,
+            categoryLabel: m.categoryLabel,
+            subtitle: m.address || `${m.latitude.toFixed(4)}, ${m.longitude.toFixed(4)}`,
+            isReal: true,
+          });
+        }
+      });
+    }
+
+    return items;
+  }, [simulatedMerchants, realMerchants, businessFilterSource, businessSearchQuery]);
 
   useEffect(() => {
     if (!mlOnline) {
@@ -316,48 +396,215 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 relative" ref={categoryDropdownRef}>
                     <label className="text-[11px] font-mono uppercase text-neutral-400">
                       Declared Category
                     </label>
-                    <select
-                      value={customCategory}
-                      onChange={e => setCustomCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#14141e] border border-[#2e2e44] text-white text-xs font-mono focus:border-indigo-400 focus:outline-none"
+                    <button
+                      type="button"
+                      onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                      className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-[#14141e] border text-white text-xs font-mono transition-all shadow-sm ${
+                        categoryDropdownOpen ? 'border-indigo-400 bg-[#1c1c2a]' : 'border-[#2e2e44] hover:border-[#3e3e5c]'
+                      }`}
                     >
-                      {DECLARED_CATEGORIES.map(cat => (
-                        <option key={cat.value} value={cat.value} className="bg-[#14141e] text-white">
-                          {cat.label} ({cat.mcc})
-                        </option>
-                      ))}
-                    </select>
+                      <span className="truncate">
+                        {DECLARED_CATEGORIES.find(c => c.value === customCategory)?.label || customCategory}
+                      </span>
+                      <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${categoryDropdownOpen ? 'rotate-180 text-white' : 'text-neutral-400'}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {categoryDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                          transition={{ duration: 0.15, ease: 'easeOut' }}
+                          className="absolute left-0 mt-2 w-full min-w-[240px] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]"
+                        >
+                          <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
+                            {DECLARED_CATEGORIES.map(cat => {
+                              const isActive = customCategory === cat.value;
+                              return (
+                                <motion.button
+                                  key={cat.value}
+                                  type="button"
+                                  whileHover={{ scale: 1.012, x: 2 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                                  onClick={() => {
+                                    setCustomCategory(cat.value);
+                                    setCategoryDropdownOpen(false);
+                                  }}
+                                  className={`w-full flex items-center justify-between gap-3 p-2 rounded-xl text-left transition-colors border ${
+                                    isActive
+                                      ? 'bg-white text-black font-semibold border-white shadow-md'
+                                      : 'bg-[#181822] hover:bg-[#252536] text-[#e2e2ec] hover:text-white border-[#242436] hover:border-[#3e3e58]'
+                                  }`}
+                                >
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-semibold">{cat.label}</div>
+                                    <div className={`text-[10px] font-mono truncate mt-0.5 ${isActive ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                                      {cat.mcc}
+                                    </div>
+                                  </div>
+                                  {isActive && <Check className="w-3.5 h-3.5 text-black shrink-0 stroke-[2.5]" />}
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </>
               ) : (
-                <div className="space-y-1.5 md:col-span-3">
+                <div className="space-y-1.5 md:col-span-3 relative" ref={businessDropdownRef}>
                   <label className="text-[11px] font-mono uppercase text-neutral-400 flex items-center gap-1.5">
                     <Building2 className="w-3.5 h-3.5 text-indigo-400" /> Select Business from Database
                   </label>
-                  <select
-                    value={selectedMerchantId}
-                    onChange={e => setSelectedMerchantId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#14141e] border border-[#2e2e44] text-white text-xs font-mono focus:border-indigo-400 focus:outline-none"
+                  
+                  {/* Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={() => setBusinessDropdownOpen(!businessDropdownOpen)}
+                    className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[#14141e] border text-white text-xs font-mono transition-all shadow-sm ${
+                      businessDropdownOpen ? 'border-indigo-400 bg-[#1c1c2a]' : 'border-[#2e2e44] hover:border-[#3e3e5c]'
+                    }`}
                   >
-                    <optgroup label="Simulated Monitored Merchants" className="bg-[#14141e] text-amber-300 font-bold">
-                      {simulatedMerchants.map(m => (
-                        <option key={m.id} value={m.id} className="bg-[#14141e] text-white font-normal">
-                          {m.id} · {m.displayName} ({m.categoryLabel}) — Prior Risk: {m.riskScore}/100
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Directory Commercial Merchants (OpenStreetMap)" className="bg-[#14141e] text-indigo-300 font-bold">
-                      {realMerchants.slice(0, 80).map(m => (
-                        <option key={m.id} value={m.id} className="bg-[#14141e] text-white font-normal">
-                          {m.name} · {m.categoryLabel} ({m.id})
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
+                    <div className="flex items-center gap-2 truncate">
+                      {(() => {
+                        const sSim = simulatedMerchants.find(m => m.id === selectedMerchantId);
+                        const sReal = realMerchants.find(m => m.id === selectedMerchantId);
+                        const isOsm = !!sReal && !sSim;
+                        return (
+                          <>
+                            <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase ${
+                              isOsm ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            }`}>
+                              {isOsm ? 'OSM' : 'SIM'}
+                            </span>
+                            <span className="font-semibold text-white truncate">
+                              {sSim ? `${sSim.id} · ${sSim.displayName} (${sSim.categoryLabel})` : sReal ? `${sReal.name} · ${sReal.categoryLabel}` : selectedMerchantId || 'Choose a business'}
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${businessDropdownOpen ? 'rotate-180 text-white' : 'text-neutral-400'}`} />
+                  </button>
+
+                  {/* Dropdown Panel matching Tabs dropdown */}
+                  <AnimatePresence>
+                    {businessDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="absolute left-0 mt-2 w-full rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-3 z-50 ring-1 ring-[#3b3b54]"
+                      >
+                        {/* Search input */}
+                        <div className="relative mb-2.5">
+                          <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-2.5" />
+                          <input
+                            type="text"
+                            value={businessSearchQuery}
+                            onChange={e => setBusinessSearchQuery(e.target.value)}
+                            placeholder="Search name, category, or ID..."
+                            className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#181824] border border-[#2e2e42] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-400 font-mono"
+                            autoFocus
+                          />
+                        </div>
+
+                        {/* Filter Tabs */}
+                        <div className="flex border-b border-[#242436] pb-2 mb-2 gap-1 text-[11px] font-mono">
+                          <button
+                            type="button"
+                            onClick={() => setBusinessFilterSource('ALL')}
+                            className={`px-2 py-1 rounded-lg transition-colors ${
+                              businessFilterSource === 'ALL' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            All ({simulatedMerchants.length + realMerchants.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBusinessFilterSource('SIM')}
+                            className={`px-2 py-1 rounded-lg transition-colors ${
+                              businessFilterSource === 'SIM' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            Simulated ({simulatedMerchants.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBusinessFilterSource('OSM')}
+                            className={`px-2 py-1 rounded-lg transition-colors ${
+                              businessFilterSource === 'OSM' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            OSM Shops ({realMerchants.length})
+                          </button>
+                        </div>
+
+                        {/* Scrollable list */}
+                        <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                          {filteredCatalogMerchants.length === 0 ? (
+                            <p className="text-xs text-neutral-500 font-mono text-center py-4">No matching businesses found.</p>
+                          ) : (
+                            filteredCatalogMerchants.map(item => {
+                              const isActive = item.id === selectedMerchantId;
+                              return (
+                                <motion.button
+                                  key={item.id}
+                                  type="button"
+                                  whileHover={{ scale: 1.012, x: 2 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                                  onClick={() => {
+                                    setSelectedMerchantId(item.id);
+                                    setBusinessDropdownOpen(false);
+                                  }}
+                                  className={`w-full flex items-center justify-between gap-2.5 p-2 rounded-xl text-left transition-colors border ${
+                                    isActive
+                                      ? 'bg-white text-black font-semibold border-white shadow-md'
+                                      : 'bg-[#181822] hover:bg-[#252536] text-[#e2e2ec] hover:text-white border-[#242436] hover:border-[#3e3e58]'
+                                  }`}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`text-[10px] font-mono truncate max-w-[70px] ${isActive ? 'text-neutral-700' : 'text-[#818198]'}`}>
+                                        {item.id}
+                                      </span>
+                                      <span className={`text-xs truncate ${isActive ? 'text-black font-semibold' : 'text-white'}`}>
+                                        {item.displayName}
+                                      </span>
+                                    </div>
+                                    <p className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-neutral-600' : 'text-[#9ca3af]'}`}>
+                                      {item.categoryLabel} · {item.subtitle}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center space-x-1.5 shrink-0 ml-1">
+                                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full border ${
+                                      isActive
+                                        ? 'border-black/30 bg-[#f0f0f0] text-black font-bold'
+                                        : item.isReal
+                                          ? 'border-sky-500/40 bg-sky-500/10 text-sky-300'
+                                          : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
+                                    }`}>
+                                      {item.isReal ? 'OSM' : 'SIM'}
+                                    </span>
+                                    {isActive && <Check className="w-3.5 h-3.5 text-black shrink-0 stroke-[2.5]" />}
+                                  </div>
+                                </motion.button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
