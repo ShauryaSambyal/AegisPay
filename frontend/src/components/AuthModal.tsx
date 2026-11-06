@@ -515,10 +515,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
               >
-                {loading ? 'Submitting Application...' : 'Submit Provider Application (PENDING_APPROVAL)'}
+                {loading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    <span>Submitting Application...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit Provider Application</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
+              <p className="text-[11px] text-center text-neutral-500 mt-1.5">
+                Submitted applications are placed under review for administrator verification.
+              </p>
             </form>
           )}
         </div>
