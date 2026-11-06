@@ -180,3 +180,55 @@ export const logoutUser = async (idToken?: string): Promise<{ success: boolean }
   return parse<{ success: boolean }>(response);
 };
 
+export interface RegisterProviderPayload {
+  organisationName: string;
+  registeredBusinessName: string;
+  officialEmail: string;
+  contactPerson: string;
+  contactNumber: string;
+  country: string;
+  state: string;
+  city: string;
+  website?: string;
+  registrationIdentifier?: string;
+  businessDescription?: string;
+}
+
+export const registerProvider = async (
+  payload: RegisterProviderPayload,
+  idToken: string
+): Promise<{ success: boolean; data: any; message?: string }> => {
+  const response = await fetch(`${API_BASE}/api/providers/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  return parse<{ success: boolean; data: any; message?: string }>(response);
+};
+
+export const fetchMyProvider = async (
+  idToken: string
+): Promise<{ success: boolean; data: { provider: any; membership: any } }> => {
+  const response = await fetch(`${API_BASE}/api/providers/me`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  return parse<{ success: boolean; data: { provider: any; membership: any } }>(response);
+};
+
+export const uploadDatasetFile = async (
+  formData: FormData,
+  idToken: string
+): Promise<{ success: boolean; data: any; message?: string }> => {
+  const response = await fetch(`${API_BASE}/api/datasets/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: formData,
+  });
+  return parse<{ success: boolean; data: any; message?: string }>(response);
+};
+

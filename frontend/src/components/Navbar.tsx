@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Check, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Check, ShieldCheck, User, Building2, LogOut, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AuthUser } from '../types';
 
 interface NavbarProps {
   activeTab: string;
@@ -8,6 +9,9 @@ interface NavbarProps {
   backendConnected: boolean;
   mlOnline: boolean;
   onTabSelectBlur?: (tabId: string) => void;
+  currentUser?: AuthUser | null;
+  onOpenAuth?: (tab?: 'login' | 'register' | 'provider') => void;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -15,18 +19,27 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   backendConnected: _backendConnected,
   onTabSelectBlur,
+  currentUser,
+  onOpenAuth,
+  onLogout,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setIsOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setUserMenuOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        setUserMenuOpen(false);
+      }
     };
-    if (isOpen) {
+    if (isOpen || userMenuOpen) {
       document.addEventListener('mousedown', onClick);
       document.addEventListener('keydown', onKey);
     }
@@ -34,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       document.removeEventListener('mousedown', onClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [isOpen]);
+  }, [isOpen, userMenuOpen]);
 
   const navItems = [
     { id: 'overview', num: '01', label: 'Overview', desc: 'Risk KPIs, live flags & syndicate stats', badge: null },
@@ -146,6 +159,118 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </AnimatePresence>
             </div>
+          </div>
+
+          {/* Right side: Provider & Auth Controls */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {currentUser ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-[#14141e] hover:bg-[#1c1c2b] border border-[#2e2e42] text-xs transition-colors"
+                >
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-[10px]">
+                    {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="hidden sm:block text-left">
+                    <div className="font-medium text-white truncate max-w-[120px]">
+                      {currentUser.displayName || currentUser.email?.split('@')[0]}
+                    </div>
+                    <div className="text-[10px] text-neutral-400 flex items-center gap-1">
+                      <span className="uppercase text-[9px] font-mono text-emerald-400">
+                        {currentUser.organizationMembership?.role || currentUser.role || 'Member'}
+                      </span>
+                      {currentUser.organizationMembership?.provider && (
+                        <>
+                          <span>•</span>
+                          <span className="truncate max-w-[90px] text-neutral-300">
+                            {currentUser.organizationMembership.provider.organisationName}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                      className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#121218] border border-[#2e2e42] shadow-2xl p-3 z-50 ring-1 ring-[#3b3b54]"
+                    >
+                      <div className="px-2 py-1.5 border-b border-[#222230] mb-2">
+                        <p className="text-xs font-semibold text-white truncate">{currentUser.displayName || 'User'}</p>
+                        <p className="text-[11px] text-neutral-400 truncate">{currentUser.email}</p>
+                      </div>
+
+                      {/* Provider organization info */}
+                      {currentUser.organizationMembership?.provider ? (
+                        <div className="p-2 rounded-xl bg-[#191924] border border-[#2d2d3e] mb-2 text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] text-neutral-400">ORGANISATION</span>
+                            <span
+                              className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                                currentUser.organizationMembership.provider.status === 'APPROVED'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              }`}
+                            >
+                              {currentUser.organizationMembership.provider.status}
+                            </span>
+                          </div>
+                          <div className="font-semibold text-white truncate">
+                            {currentUser.organizationMembership.provider.organisationName}
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            onOpenAuth?.('provider');
+                          }}
+                          className="w-full flex items-center gap-2 p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium border border-emerald-500/20 mb-2 transition-colors"
+                        >
+                          <Building2 className="w-3.5 h-3.5" />
+                          Register Payment Provider
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          onLogout?.();
+                        }}
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => onOpenAuth?.('provider')}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-medium transition-colors"
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  Register Provider
+                </button>
+                <button
+                  onClick={() => onOpenAuth?.('login')}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-semibold shadow-md transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-black" />
+                  Sign In
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

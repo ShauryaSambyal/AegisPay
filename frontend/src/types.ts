@@ -42,6 +42,32 @@ export interface SimBaseline {
   source: 'onboarding_90d' | 'category_fallback';
 }
 
+export interface ProviderOrganization {
+  id?: string;
+  _id?: string;
+  organisationName: string;
+  registeredBusinessName?: string;
+  officialEmail?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  website?: string;
+  registrationIdentifier?: string;
+  businessDescription?: string;
+  status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'REQUIRES_MORE_INFORMATION';
+  createdAt?: string;
+}
+
+export interface ProviderMembership {
+  membershipId: string;
+  role: 'owner' | 'analyst' | 'admin';
+  permissions: string[];
+  status: string;
+  provider: ProviderOrganization | null;
+}
+
 export interface AuthUser {
   uid: string;
   email?: string;
@@ -50,6 +76,7 @@ export interface AuthUser {
   emailVerified?: boolean;
   phoneNumber?: string;
   createdAt?: string;
+  organizationMembership?: ProviderMembership | null;
 }
 
 export interface AuthResponse {
