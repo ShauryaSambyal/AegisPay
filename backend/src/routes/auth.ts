@@ -12,6 +12,9 @@ import {
 } from '../services/firebaseService.js';
 import { requireAuth } from '../middleware/auth.js';
 import { sendError } from '../lib/errors.js';
+import { UserMembership } from '../models/UserMembership.js';
+import { Provider } from '../models/Provider.js';
+import { isDatabaseConnected } from '../config/database.js';
 
 const router = Router();
 
@@ -226,6 +229,35 @@ router.post('/verify', async (req: Request, res: Response) => {
 router.get('/me', requireAuth, async (req: Request, res: Response) => {
   try {
     const uid = req.user!.uid;
+    let organizationMembership: Record<string, unknown> | null = null;
+
+    if (isDatabaseConnected()) {
+      try {
+        const membership = await UserMembership.findOne({
+          firebaseUid: uid,
+          status: 'active',
+        });
+        if (membership) {
+          const provider = await Provider.findById(membership.providerId);
+          organizationMembership = {
+            membershipId: membership._id,
+            role: membership.role,
+            permissions: membership.permissions,
+            status: membership.status,
+            provider: provider
+              ? {
+                  id: provider._id,
+                  organisationName: provider.organisationName,
+                  status: provider.status,
+                  officialEmail: provider.officialEmail,
+                }
+              : null,
+          };
+        }
+      } catch (dbErr) {
+        console.warn('[Auth Me] Failed to resolve membership:', dbErr);
+      }
+    }
 
     if (isFirebaseConfigured()) {
       try {
@@ -242,6 +274,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response) => {
             phoneNumber: fullRecord.phoneNumber,
             metadata: fullRecord.metadata,
             customClaims: fullRecord.customClaims || {},
+            organization: organizationMembership,
           },
         });
         return;
@@ -252,7 +285,10 @@ router.get('/me', requireAuth, async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      user: req.user,
+      user: {
+        ...req.user,
+        organization: organizationMembership,
+      },
     });
   } catch (err: unknown) {
     const rawMsg = err instanceof Error ? err.message : 'Failed to retrieve profile';

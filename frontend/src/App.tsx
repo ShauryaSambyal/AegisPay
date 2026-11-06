@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
+import { MotionBlurCanvas, MotionBlurCanvasHandle } from './components/MotionBlurCanvas';
 import { DashboardOverview } from './components/DashboardOverview';
 import { TransactionStream } from './components/TransactionStream';
 import { SyndicateGraph } from './components/SyndicateGraph';
@@ -43,6 +45,7 @@ export const App: React.FC = () => {
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const motionBlurRef = useRef<MotionBlurCanvasHandle>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -86,6 +89,9 @@ export const App: React.FC = () => {
   }, [fetchData]);
 
   const navigate = (tab: string) => {
+    if (tab !== activeTab) {
+      motionBlurRef.current?.triggerBlur('forward');
+    }
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -159,72 +165,88 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070708] text-[#EDEDED] flex flex-col font-sans selection:bg-white selection:text-black bg-baunfire-grid">
-      <Navbar activeTab={activeTab} setActiveTab={navigate} backendConnected={backendConnected} mlOnline={mlOnline} />
+    <div className="min-h-screen bg-[#070708] text-[#EDEDED] flex flex-col font-sans selection:bg-white selection:text-black bg-baunfire-grid relative">
+      <MotionBlurCanvas ref={motionBlurRef} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={navigate}
+        backendConnected={backendConnected}
+        mlOnline={mlOnline}
+        onTabSelectBlur={navigate}
+      />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <div key={activeTab} className="animate-page-enter">
-          {activeTab === 'overview' && (
-            <DashboardOverview
-              realMerchants={realMerchants}
-              simulatedMerchants={simulatedMerchants}
-              transactions={transactions}
-              modelInfo={modelInfo}
-              mlOnline={mlOnline}
-              onSelectTab={navigate}
-              onSelectMerchantForAI={handleSelectMerchantForAI}
-            />
-          )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 14, scale: 0.985, filter: 'blur(16px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -14, scale: 1.015, filter: 'blur(16px)' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full"
+          >
+            {activeTab === 'overview' && (
+              <DashboardOverview
+                realMerchants={realMerchants}
+                simulatedMerchants={simulatedMerchants}
+                transactions={transactions}
+                modelInfo={modelInfo}
+                mlOnline={mlOnline}
+                onSelectTab={navigate}
+                onSelectMerchantForAI={handleSelectMerchantForAI}
+              />
+            )}
 
-          {activeTab === 'stream' && (
-            <TransactionStream
-              transactions={transactions}
-              simulatedMerchants={simulatedMerchants}
-              onSimulate={handleSimulate}
-              isSimulating={isSimulating}
-            />
-          )}
+            {activeTab === 'stream' && (
+              <TransactionStream
+                transactions={transactions}
+                simulatedMerchants={simulatedMerchants}
+                onSimulate={handleSimulate}
+                isSimulating={isSimulating}
+              />
+            )}
 
-          {activeTab === 'syndicate' && (
-            <SyndicateGraph
-              graphData={syndicateGraph}
-              simulatedMerchants={simulatedMerchants}
-              onSelectMerchantForAI={handleSelectMerchantForAI}
-            />
-          )}
+            {activeTab === 'syndicate' && (
+              <SyndicateGraph
+                graphData={syndicateGraph}
+                simulatedMerchants={simulatedMerchants}
+                onSelectMerchantForAI={handleSelectMerchantForAI}
+              />
+            )}
 
-          {activeTab === 'merchants' && (
-            <MerchantDirectory
-              realMerchants={realMerchants}
-              simulatedMerchants={simulatedMerchants}
-              onUpdateMerchantTier={handleUpdateMerchantTier}
-              onSelectMerchantForAI={handleSelectMerchantForAI}
-            />
-          )}
+            {activeTab === 'merchants' && (
+              <MerchantDirectory
+                realMerchants={realMerchants}
+                simulatedMerchants={simulatedMerchants}
+                onUpdateMerchantTier={handleUpdateMerchantTier}
+                onSelectMerchantForAI={handleSelectMerchantForAI}
+              />
+            )}
 
-          {activeTab === 'ml-insights' && (
-            <MLInsights
-              simulatedMerchants={simulatedMerchants}
-              realMerchants={realMerchants}
-              modelInfo={modelInfo}
-              mlOnline={mlOnline}
-              onRefresh={fetchData}
-            />
-          )}
+            {activeTab === 'ml-insights' && (
+              <MLInsights
+                simulatedMerchants={simulatedMerchants}
+                realMerchants={realMerchants}
+                modelInfo={modelInfo}
+                mlOnline={mlOnline}
+                onRefresh={fetchData}
+              />
+            )}
 
-          {activeTab === 'ai-investigator' && (
-            <AIForensicInspector
-              simulatedMerchants={simulatedMerchants}
-              selectedMerchantId={selectedMerchantId}
-              onSelectMerchant={setSelectedMerchantId}
-              report={aiReport}
-              isLoading={isLoadingAi}
-              onRunInvestigation={handleRunInvestigation}
-            />
-          )}
+            {activeTab === 'ai-investigator' && (
+              <AIForensicInspector
+                simulatedMerchants={simulatedMerchants}
+                selectedMerchantId={selectedMerchantId}
+                onSelectMerchant={setSelectedMerchantId}
+                report={aiReport}
+                isLoading={isLoadingAi}
+                onRunInvestigation={handleRunInvestigation}
+              />
+            )}
 
-          {activeTab === 'api-config' && <ApiDocsConfig />}
-        </div>
+            {activeTab === 'api-config' && <ApiDocsConfig />}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <SimulationToast toast={toast} onDismiss={() => setToast(null)} onViewStream={() => navigate('stream')} />

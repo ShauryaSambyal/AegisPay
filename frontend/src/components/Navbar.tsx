@@ -1,14 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Check, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   backendConnected: boolean;
   mlOnline: boolean;
+  onTabSelectBlur?: (tabId: string) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, backendConnected }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  setActiveTab,
+  backendConnected: _backendConnected,
+  onTabSelectBlur,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +48,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, backend
   const current = navItems.find(item => item.id === activeTab) ?? navItems[0];
 
   const select = (tabId: string) => {
-    setActiveTab(tabId);
+    if (onTabSelectBlur) {
+      onTabSelectBlur(tabId);
+    } else {
+      setActiveTab(tabId);
+    }
     setIsOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -85,53 +96,55 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, backend
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-white' : 'text-neutral-400'}`} />
               </button>
 
-              {isOpen && (
-                <div className="absolute left-0 mt-2 w-72 sm:w-[23rem] rounded-2xl bg-[#121218] border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]">
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[#1c1c28] border border-[#2b2b3d] flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#a1a1b5] font-semibold">
-                      NAVIGATION · {navItems.length} VIEWS
-                    </span>
-                    <span className={`text-[10px] font-mono flex items-center gap-1.5 font-medium ${backendConnected ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                      <span className={`w-2 h-2 rounded-full ${backendConnected ? 'bg-[#10b981]' : 'bg-[#ef4444]'}`} />
-                      API {backendConnected ? 'ONLINE' : 'OFFLINE'}
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {navItems.map(item => {
-                      const isActive = activeTab === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => select(item.id)}
-                          className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left transition-all border ${
-                            isActive
-                              ? 'bg-white text-black font-semibold border-white shadow-md'
-                              : 'bg-[#181822] hover:bg-[#252536] text-[#e2e2ec] hover:text-white border-[#242436] hover:border-[#3e3e58]'
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-[10px] font-mono ${isActive ? 'text-neutral-700' : 'text-[#818198]'}`}>{item.num}</span>
-                              <span className={`text-xs ${isActive ? 'text-black font-semibold' : 'text-white'}`}>{item.label}</span>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -6, filter: 'blur(8px)' }}
+                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, scale: 0.95, y: -6, filter: 'blur(8px)' }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute left-0 mt-2 w-72 sm:w-[23rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]"
+                  >
+                    <div className="space-y-1.5">
+                      {navItems.map(item => {
+                        const isActive = activeTab === item.id;
+                        return (
+                          <motion.button
+                            key={item.id}
+                            whileHover={{ scale: 1.012, x: 2 }}
+                            whileTap={{ scale: 0.98, filter: 'blur(1.5px)' }}
+                            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                            onClick={() => select(item.id)}
+                            className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left transition-colors border ${
+                              isActive
+                                ? 'bg-white text-black font-semibold border-white shadow-md'
+                                : 'bg-[#181822] hover:bg-[#252536] text-[#e2e2ec] hover:text-white border-[#242436] hover:border-[#3e3e58]'
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <span className={`text-[10px] font-mono ${isActive ? 'text-neutral-700' : 'text-[#818198]'}`}>{item.num}</span>
+                                <span className={`text-xs ${isActive ? 'text-black font-semibold' : 'text-white'}`}>{item.label}</span>
+                              </div>
+                              <p className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-neutral-600' : 'text-[#9ca3af]'}`}>{item.desc}</p>
                             </div>
-                            <p className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-neutral-600' : 'text-[#9ca3af]'}`}>{item.desc}</p>
-                          </div>
-                          <div className="flex items-center space-x-2 shrink-0 ml-2">
-                            {item.badge && (
-                              <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
-                                isActive ? 'border-black/30 bg-[#f0f0f0] text-black font-bold' : 'border-[#38384e] bg-[#222232] text-[#c4c4dc]'
-                              }`}>
-                                {item.badge}
-                              </span>
-                            )}
-                            {isActive && <Check className="w-4 h-4 text-black shrink-0 stroke-[2.5]" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                            <div className="flex items-center space-x-2 shrink-0 ml-2">
+                              {item.badge && (
+                                <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                                  isActive ? 'border-black/30 bg-[#f0f0f0] text-black font-bold' : 'border-[#38384e] bg-[#222232] text-[#c4c4dc]'
+                                }`}>
+                                  {item.badge}
+                                </span>
+                              )}
+                              {isActive && <Check className="w-4 h-4 text-black shrink-0 stroke-[2.5]" />}
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

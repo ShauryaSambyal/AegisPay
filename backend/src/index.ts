@@ -13,9 +13,13 @@ import mlRouter from './routes/ml.js';
 import aiRouter from './routes/ai.js';
 import osmRouter from './routes/osm.js';
 import authRouter from './routes/auth.js';
+import providerRouter from './routes/provider.js';
+import adminRouter from './routes/admin.js';
+import datasetRouter from './routes/datasets.js';
 import { realMerchantsMeta } from './data/merchantsData.js';
 import { simulatedMerchantsMeta } from './data/simulatedMerchants.js';
 import { isFirebaseConfigured, isWebApiKeyConfigured } from './services/firebaseService.js';
+import { connectDatabase, isDatabaseConnected } from './config/database.js';
 import { sendError } from './lib/errors.js';
 
 dotenv.config();
@@ -37,8 +41,14 @@ app.use(cors({
 app.options('*', cors());
 app.use(express.json());
 
+// Attempt non-blocking MongoDB connection
+connectDatabase();
+
 // API routes
 app.use('/api/auth', authRouter);
+app.use('/api/providers', providerRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/datasets', datasetRouter);
 app.use('/api/merchants', merchantsRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/simulator', simulatorRouter);
@@ -68,6 +78,8 @@ app.get('/api/health', (_req, res) => {
       : isWebApiKeyConfigured()
       ? 'Firebase REST active'
       : 'Firebase pending configuration in .env',
+    database: isDatabaseConnected() ? 'MongoDB connected' : 'MongoDB offline/simulated fallback',
+    multiProvider: true,
     mlServiceUrl: process.env.ML_SERVICE_URL ?? 'http://127.0.0.1:8001',
     timestamp: new Date().toISOString(),
   });

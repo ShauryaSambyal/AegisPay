@@ -381,3 +381,58 @@ Deliberate asymmetries, all one-directional:
   `baseline` only. The ML service never mutates the merchant catalogue.
 * `RealMerchant` exists only in TS; Python exposes `MerchantIdentity` for
   documentation and never accepts it in a scoring request.
+
+---
+
+# Multi-Provider Payment Intelligence Platform API
+
+The following endpoints extend AegisPay with a multi-tenant provider architecture. All endpoints (except public registration) derive tenancy and identity strictly from the verified Firebase ID Token (`Authorization: Bearer <idToken>`) and MongoDB server-side `UserMembership` records.
+
+### 1. Provider Management (`/api/providers`)
+
+| Method | Path | Auth / Role | Description |
+| --- | --- | --- | --- |
+| `POST` | `/api/providers/register` | Authenticated | Register a new provider organization (sets status to `PENDING_APPROVAL`, binds user as `owner`). |
+| `GET` | `/api/providers/me` | Authenticated + Member | Returns active provider details, owner, and membership. |
+| `PATCH` | `/api/providers/me` | Owner / Admin | Updates provider organization details (website, description, contact). |
+| `GET` | `/api/providers/me/members` | Provider Member | Lists all team members in the provider organization. |
+| `POST` | `/api/providers/me/members/invite` | Owner / Admin | Invites or adds a member to the provider with role (`analyst` or `owner`). |
+| `PATCH` | `/api/providers/me/members/:userId` | Owner / Admin | Updates member role (`analyst`/`owner`) or status (`active`/`deactivated`). |
+
+### 2. Platform Administration (`/api/admin`)
+
+| Method | Path | Auth / Role | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/admin/providers` | Platform Admin | Lists all registered providers across the platform (filterable by `status`). |
+| `GET` | `/api/admin/providers/:id` | Platform Admin | Retrieves detailed registration data, verification documents, and audit trails. |
+| `PATCH` | `/api/admin/providers/:id/status` | Platform Admin | Updates provider status (`APPROVED`, `REJECTED`, `SUSPENDED`, `REQUIRES_MORE_INFORMATION`). |
+| `GET` | `/api/admin/dashboard` | Platform Admin | High-level metrics: total providers, approved, pending, total merchants, total transactions. |
+| `GET` | `/api/admin/audit-logs` | Platform Admin | Audit trail of administrative and provider lifecycle actions. |
+
+### 3. Datasets & Transactions (`/api/datasets`)
+
+| Method | Path | Auth / Role | Description |
+| --- | --- | --- | --- |
+| `POST` | `/api/datasets/upload` | Approved Provider | Uploads CSV transaction file (multipart `file`). Validates columns and headers. |
+| `POST` | `/api/datasets/:id/process` | Approved Provider | Initiates streaming ingestion into MongoDB `transactions` collection. |
+| `GET` | `/api/datasets` | Approved Provider | Lists all datasets uploaded by this provider with validation status and metrics. |
+| `GET` | `/api/datasets/:id` | Approved Provider | Retrieves dataset metadata, row counts, validation errors, and progress. |
+| `DELETE` | `/api/datasets/:id` | Approved Owner/Admin | Deletes dataset and soft-cleans related staging assets. |
+
+### 4. Provider-Scoped Merchants & Transactions
+
+| Method | Path | Auth / Role | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/merchants?origin=provider` | Approved Provider | Returns only merchants belonging to the authenticated provider. |
+| `POST` | `/api/merchants` | Approved Provider | Registers a new merchant under the authenticated provider's tenancy. |
+| `GET` | `/api/merchants/:id` | Approved Provider / Public | If `providerId` matches or demo merchant, returns full merchant profile. |
+| `GET` | `/api/transactions?origin=provider` | Approved Provider | Paginated transactions belonging strictly to the authenticated provider. |
+
+### 5. ML Analysis & Risk Scoring (`/api/ml`)
+
+| Method | Path | Auth / Role | Description |
+| --- | --- | --- | --- |
+| `POST` | `/api/ml/analyze-merchant` | Approved Provider | Analyzes provider merchant transactions via Python FastAPI ML / heuristic fallback. |
+| `GET` | `/api/ml/merchant/:id/risk` | Approved Provider | Returns latest ML risk score, risk factors, behavioural breakdown, and confidence. |
+| `GET` | `/api/ml/history?merchantId=...` | Approved Provider | Historical risk assessments and behavioural shifts for auditing and compliance. |
+

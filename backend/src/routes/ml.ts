@@ -4,6 +4,13 @@ import path from 'path';
 import fs from 'fs';
 import { findRealMerchant } from '../data/merchantsData.js';
 import { findSimulatedMerchant } from '../data/simulatedMerchants.js';
+import { requireAuth, requireProvider, requireProviderApproval, requireRole } from '../middleware/auth.js';
+import { analyzeMerchant } from '../services/mlService.js';
+import { RiskAssessment } from '../models/RiskAssessment.js';
+import { Merchant } from '../models/Merchant.js';
+import { isDatabaseConnected } from '../config/database.js';
+import { Types } from 'mongoose';
+import { sendError } from '../lib/errors.js';
 
 /**
  * Express proxy to the Python ML service with resilient auto-start and offline fallback.
@@ -323,5 +330,201 @@ router.post('/score/merchant', async (req: Request, res: Response) => {
   }
   res.json(calculateFallbackScore(req.body ?? {}));
 });
+
+/* -------------------------------------------------------------------------- */
+/* Provider-Scoped Forensic Analysis & Risk Assessments                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * POST /api/ml/analyze-merchant
+ * Trigger forensic ML risk analysis for an authorized provider merchant.
+ */
+router.post(
+  '/analyze-merchant',
+  requireAuth,
+  requireProvider,
+  requireProviderApproval,
+  requireRole('owner', 'analyst', 'admin'),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!isDatabaseConnected()) {
+      sendError(res, 503, 'DATABASE_UNAVAILABLE', 'MongoDB is not connected');
+      return;
+    }
+
+    try {
+      const { merchantId, datasetId } = req.body;
+      if (!merchantId) {
+        sendError(res, 400, 'MISSING_MERCHANT_ID', 'merchantId is required');
+        return;
+      }
+
+      const assessment = await analyzeMerchant({
+        providerId: String(req.provider!._id),
+        merchantId: String(merchantId),
+        datasetId: datasetId ? String(datasetId) : undefined,
+        userId: req.user!.uid,
+      });
+
+      res.json({
+        success: true,
+        message: 'Forensic risk analysis completed',
+        data: assessment,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, 'ANALYSIS_FAILED', `Failed to analyze merchant: ${msg}`);
+    }
+  }
+);
+
+/**
+ * GET /api/ml/merchant/:merchantId/risk
+ * Get the latest risk assessment for an authorized merchant.
+ */
+router.get(
+  '/merchant/:merchantId/risk',
+  requireAuth,
+  requireProvider,
+  async (req: Request, res: Response): Promise<void> => {
+    if (!isDatabaseConnected()) {
+      sendError(res, 503, 'DATABASE_UNAVAILABLE', 'MongoDB is not connected');
+      return;
+    }
+
+    try {
+      const { merchantId } = req.params;
+      if (!Types.ObjectId.isValid(merchantId)) {
+        sendError(res, 400, 'INVALID_MERCHANT_ID', 'Invalid merchant ID format');
+        return;
+      }
+
+      // Verify merchant belongs to this provider
+      const merchant = await Merchant.findOne({
+        _id: new Types.ObjectId(merchantId),
+        providerId: req.provider!._id,
+      });
+
+      if (!merchant) {
+        sendError(res, 404, 'MERCHANT_NOT_FOUND', 'Merchant not found or access denied for this provider');
+        return;
+      }
+
+      const latestAssessment = await RiskAssessment.findOne({
+        merchantId: merchant._id,
+        providerId: req.provider!._id,
+      }).sort({ createdAt: -1 });
+
+      if (!latestAssessment) {
+        res.json({
+          success: true,
+          data: {
+            merchantId: merchant._id,
+            merchantName: merchant.merchantName,
+            riskScore: merchant.riskScore ?? 0,
+            riskLevel: 'INSUFFICIENT_DATA',
+            notice: 'No risk assessment generated yet. Run /api/ml/analyze-merchant to evaluate.',
+          },
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: latestAssessment,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, 'FETCH_RISK_FAILED', `Failed to retrieve risk assessment: ${msg}`);
+    }
+  }
+);
+
+/**
+ * GET /api/ml/merchant/:merchantId/history
+ * Get risk assessment history for a provider's merchant.
+ */
+router.get(
+  '/merchant/:merchantId/history',
+  requireAuth,
+  requireProvider,
+  async (req: Request, res: Response): Promise<void> => {
+    if (!isDatabaseConnected()) {
+      sendError(res, 503, 'DATABASE_UNAVAILABLE', 'MongoDB is not connected');
+      return;
+    }
+
+    try {
+      const { merchantId } = req.params;
+      if (!Types.ObjectId.isValid(merchantId)) {
+        sendError(res, 400, 'INVALID_MERCHANT_ID', 'Invalid merchant ID format');
+        return;
+      }
+
+      const history = await RiskAssessment.find({
+        merchantId: new Types.ObjectId(merchantId),
+        providerId: req.provider!._id,
+      }).sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        count: history.length,
+        data: history,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, 'FETCH_HISTORY_FAILED', `Failed to retrieve history: ${msg}`);
+    }
+  }
+);
+
+/**
+ * GET /api/ml/merchant/:merchantId/explanation
+ * Explain behavioural drift and feature factors for a provider merchant.
+ */
+router.get(
+  '/merchant/:merchantId/explanation',
+  requireAuth,
+  requireProvider,
+  async (req: Request, res: Response): Promise<void> => {
+    if (!isDatabaseConnected()) {
+      sendError(res, 503, 'DATABASE_UNAVAILABLE', 'MongoDB is not connected');
+      return;
+    }
+
+    try {
+      const { merchantId } = req.params;
+      if (!Types.ObjectId.isValid(merchantId)) {
+        sendError(res, 400, 'INVALID_MERCHANT_ID', 'Invalid merchant ID format');
+        return;
+      }
+
+      const assessment = await RiskAssessment.findOne({
+        merchantId: new Types.ObjectId(merchantId),
+        providerId: req.provider!._id,
+      }).sort({ createdAt: -1 });
+
+      if (!assessment) {
+        sendError(res, 404, 'ASSESSMENT_NOT_FOUND', 'No assessment on record for this merchant');
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: {
+          merchantId: assessment.merchantId,
+          riskScore: assessment.riskScore,
+          riskLevel: assessment.riskLevel,
+          confidence: assessment.confidence,
+          riskFactors: assessment.riskFactors,
+          explanation: assessment.explanation,
+          modelVersion: assessment.modelVersion,
+        },
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, 'EXPLANATION_FAILED', `Failed to retrieve explanation: ${msg}`);
+    }
+  }
+);
 
 export default router;
