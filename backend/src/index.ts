@@ -12,11 +12,18 @@ import riskRouter from './routes/risk.js';
 import mlRouter from './routes/ml.js';
 import aiRouter from './routes/ai.js';
 import osmRouter from './routes/osm.js';
+import authRouter from './routes/auth.js';
 import { realMerchantsMeta } from './data/merchantsData.js';
 import { simulatedMerchantsMeta } from './data/simulatedMerchants.js';
+import { isFirebaseConfigured, isWebApiKeyConfigured } from './services/firebaseService.js';
 import { sendError } from './lib/errors.js';
 
 dotenv.config();
+// Ensure backend/.env is also loaded when running from repo root
+const rootCandidate = path.resolve(process.cwd(), 'backend/.env');
+if (fs.existsSync(rootCandidate)) {
+  dotenv.config({ path: rootCandidate });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +38,7 @@ app.options('*', cors());
 app.use(express.json());
 
 // API routes
+app.use('/api/auth', authRouter);
 app.use('/api/merchants', merchantsRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/simulator', simulatorRouter);
@@ -55,6 +63,11 @@ app.get('/api/health', (_req, res) => {
       simulatedMerchants: { origin: 'simulated', count: simulatedMerchantsMeta.count },
     },
     aiEngine: process.env.GEMINI_API_KEY ? 'Gemini configured (gemini-2.5-flash)' : 'Deterministic heuristic reports',
+    authEngine: isFirebaseConfigured()
+      ? 'Firebase Admin active'
+      : isWebApiKeyConfigured()
+      ? 'Firebase REST active'
+      : 'Firebase pending configuration in .env',
     mlServiceUrl: process.env.ML_SERVICE_URL ?? 'http://127.0.0.1:8001',
     timestamp: new Date().toISOString(),
   });

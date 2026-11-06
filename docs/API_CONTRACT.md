@@ -55,10 +55,120 @@ Every error response uses one envelope:
     "simulatedMerchants": { "origin": "simulated", "count": 14 }
   },
   "aiEngine": "Deterministic heuristic reports",
+  "authEngine": "Firebase Admin active",
   "mlServiceUrl": "http://127.0.0.1:8001",
   "timestamp": "2026-11-05T..."
 }
 ```
+
+### `GET /api/auth/status`
+
+Returns Firebase configuration and engine status.
+
+```json
+{
+  "success": true,
+  "data": {
+    "configured": true,
+    "adminSdkReady": true,
+    "webApiKeyConfigured": true,
+    "features": {
+      "registration": true,
+      "emailPasswordLogin": true,
+      "tokenVerification": true,
+      "customTokens": true
+    }
+  }
+}
+```
+
+### `POST /api/auth/register`
+
+Register a new user account with Firebase.
+
+Request body:
+```json
+{
+  "email": "analyst@example.com",
+  "password": "Password123!",
+  "displayName": "Jane Doe",
+  "role": "analyst"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "user": {
+    "uid": "...",
+    "email": "analyst@example.com",
+    "displayName": "Jane Doe",
+    "role": "analyst",
+    "emailVerified": false,
+    "createdAt": "..."
+  },
+  "tokens": {
+    "idToken": "...",
+    "refreshToken": "...",
+    "expiresIn": 3600
+  }
+}
+```
+
+### `POST /api/auth/login`
+
+Authenticate user with email and password, or verify client Firebase ID token.
+
+Request body (Option A - email/password):
+```json
+{
+  "email": "analyst@example.com",
+  "password": "Password123!"
+}
+```
+
+Request body (Option B - ID token verification):
+```json
+{
+  "idToken": "<firebase_id_token>"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "user": {
+    "uid": "...",
+    "email": "analyst@example.com",
+    "displayName": "Jane Doe",
+    "role": "analyst"
+  },
+  "tokens": {
+    "idToken": "...",
+    "refreshToken": "...",
+    "expiresIn": 3600
+  }
+}
+```
+
+### `GET /api/auth/me`
+
+Protected route. Requires `Authorization: Bearer <idToken>`. Returns authenticated user record and claims.
+
+### `POST /api/auth/verify`
+
+Verifies a token passed in body `{ "idToken": "..." }` or `Authorization: Bearer <token>`.
+
+### `POST /api/auth/logout`
+
+Revokes refresh tokens for user session.
+
+### `POST /api/auth/forgot-password`
+
+Request body: `{ "email": "analyst@example.com" }`. Sends reset email or returns reset link.
+
 
 ### `GET /api/merchants?origin=real_osm|simulated|all`
 

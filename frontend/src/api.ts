@@ -10,6 +10,9 @@ import {
   SimulatedMerchant,
   SyndicateGraphType,
   Transaction,
+  AuthResponse,
+  AuthStatusResponse,
+  AuthUser,
 } from './types';
 
 /** Thin fetch layer. Every call surfaces the backend error envelope. */
@@ -127,3 +130,53 @@ export const scoreMerchant = predictBusinessOutcome;
 
 export const datasetLabel = (entry: DatasetEntry): string =>
   entry.available ? 'available locally' : 'not available in this environment';
+
+/* ----------------------------------------------------------- Auth endpoints */
+
+export const fetchAuthStatus = async (): Promise<AuthStatusResponse> => {
+  const response = await fetch(`${API_BASE}/api/auth/status`);
+  return parse<AuthStatusResponse>(response);
+};
+
+export const registerUser = async (data: {
+  email: string;
+  password: string;
+  displayName?: string;
+  role?: string;
+}): Promise<AuthResponse> => {
+  const response = await fetch(`${API_BASE}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return parse<AuthResponse>(response);
+};
+
+export const loginUser = async (credentials: {
+  email?: string;
+  password?: string;
+  idToken?: string;
+}): Promise<AuthResponse> => {
+  const response = await fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+  return parse<AuthResponse>(response);
+};
+
+export const fetchCurrentUser = async (idToken: string): Promise<{ success: boolean; user: AuthUser }> => {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  return parse<{ success: boolean; user: AuthUser }>(response);
+};
+
+export const logoutUser = async (idToken?: string): Promise<{ success: boolean }> => {
+  const response = await fetch(`${API_BASE}/api/auth/logout`, {
+    method: 'POST',
+    headers: idToken ? { Authorization: `Bearer ${idToken}` } : {},
+  });
+  return parse<{ success: boolean }>(response);
+};
+

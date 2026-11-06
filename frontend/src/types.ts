@@ -42,6 +42,45 @@ export interface SimBaseline {
   source: 'onboarding_90d' | 'category_fallback';
 }
 
+export interface AuthUser {
+  uid: string;
+  email?: string;
+  displayName?: string;
+  role: string;
+  emailVerified?: boolean;
+  phoneNumber?: string;
+  createdAt?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message?: string;
+  user: AuthUser;
+  tokens?: {
+    idToken?: string;
+    refreshToken?: string;
+    expiresIn?: number;
+    customToken?: string;
+  };
+}
+
+export interface AuthStatusResponse {
+  success: boolean;
+  data: {
+    configured: boolean;
+    adminSdkReady: boolean;
+    webApiKeyConfigured: boolean;
+    projectId?: string;
+    authDomain?: string;
+    features: {
+      registration: boolean;
+      emailPasswordLogin: boolean;
+      tokenVerification: boolean;
+    };
+  };
+  instructions: string;
+}
+
 export interface SimulatorMetrics {
   totalVolume30d: number;
   transactionCount30d: number;
