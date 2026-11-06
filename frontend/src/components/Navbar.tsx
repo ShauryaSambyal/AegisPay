@@ -8,7 +8,6 @@ interface NavbarProps {
   setActiveTab: (tab: string) => void;
   backendConnected: boolean;
   mlOnline: boolean;
-  onTabSelectBlur?: (tabId: string) => void;
   currentUser?: AuthUser | null;
   onOpenAuth?: (tab?: 'login' | 'register' | 'provider') => void;
   onLogout?: () => void;
@@ -18,7 +17,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   backendConnected: _backendConnected,
-  onTabSelectBlur,
   currentUser,
   onOpenAuth,
   onLogout,
@@ -61,11 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const current = navItems.find(item => item.id === activeTab) ?? navItems[0];
 
   const select = (tabId: string) => {
-    if (onTabSelectBlur) {
-      onTabSelectBlur(tabId);
-    } else {
-      setActiveTab(tabId);
-    }
+    setActiveTab(tabId);
     setIsOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -112,10 +106,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -6, filter: 'blur(8px)' }}
-                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, scale: 0.95, y: -6, filter: 'blur(8px)' }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
                     className="absolute left-0 mt-2 w-72 sm:w-[23rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]"
                   >
                     <div className="space-y-1.5">
@@ -125,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <motion.button
                             key={item.id}
                             whileHover={{ scale: 1.012, x: 2 }}
-                            whileTap={{ scale: 0.98, filter: 'blur(1.5px)' }}
+                            whileTap={{ scale: 0.98 }}
                             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                             onClick={() => select(item.id)}
                             className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left transition-colors border ${

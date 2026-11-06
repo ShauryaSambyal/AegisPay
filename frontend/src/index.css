@@ -15,11 +15,17 @@ body {
   margin: 0;
   background-color: #070708;
   color: #ededed;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Bricolage Grotesque', 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
+}
+
+/* Bricolage Grotesque heading weights & tracking */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  letter-spacing: -0.022em;
 }
 
 /* Ensure all scrollable containers use smooth scroll */

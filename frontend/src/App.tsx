@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
-import { MotionBlurCanvas, MotionBlurCanvasHandle } from './components/MotionBlurCanvas';
 import { DashboardOverview } from './components/DashboardOverview';
 import { TransactionStream } from './components/TransactionStream';
 import { SyndicateGraph } from './components/SyndicateGraph';
@@ -49,7 +48,6 @@ export const App: React.FC = () => {
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastState | null>(null);
-  const motionBlurRef = useRef<MotionBlurCanvasHandle>(null);
 
   // User & Provider Authentication State
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -159,9 +157,6 @@ export const App: React.FC = () => {
   }, [fetchData]);
 
   const navigate = (tab: string) => {
-    if (tab !== activeTab) {
-      motionBlurRef.current?.triggerBlur('forward');
-    }
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -236,13 +231,11 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#070708] text-[#EDEDED] flex flex-col font-sans selection:bg-white selection:text-black bg-baunfire-grid relative">
-      <MotionBlurCanvas ref={motionBlurRef} />
       <Navbar
         activeTab={activeTab}
         setActiveTab={navigate}
         backendConnected={backendConnected}
         mlOnline={mlOnline}
-        onTabSelectBlur={navigate}
         currentUser={currentUser}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
@@ -252,10 +245,10 @@ export const App: React.FC = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 14, scale: 0.985, filter: 'blur(16px)' }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -14, scale: 1.015, filter: 'blur(16px)' }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="w-full"
           >
             {activeTab === 'overview' && (
