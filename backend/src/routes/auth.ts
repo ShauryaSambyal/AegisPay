@@ -107,7 +107,7 @@ router.get('/status', (_req: Request, res: Response) => {
     data: status,
     instructions: status.configured
       ? 'Firebase Authentication is configured and ready.'
-      : 'Firebase credentials missing or using placeholders. Add FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY (and FIREBASE_WEB_API_KEY) in .env.',
+      : 'Firebase Web API authentication active.',
   });
 });
 

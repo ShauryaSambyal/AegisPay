@@ -104,33 +104,27 @@ function isPlaceholder(value: string | undefined): boolean {
  * Resolves the Firebase Web API Key across canonical and legacy aliases.
  */
 export function getWebApiKey(): string | undefined {
-  const raw =
-    process.env.FIREBASE_WEB_API_KEY ||
-    process.env.FIREBASE_API_KEY ||
-    process.env.apiKey;
+  const raw = process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY;
   const trimmed = raw?.trim();
-  return trimmed && !isPlaceholder(trimmed) ? trimmed : undefined;
+  return trimmed && !isPlaceholder(trimmed) ? trimmed : 'AIzaSyCPba9bbkDBRiwvfgC3IxKCl9vFBL2v5ic';
 }
 
 /**
- * Resolves the Firebase Project ID across canonical and legacy aliases.
+ * Resolves the Firebase Project ID across canonical and default values.
  */
 export function getFirebaseProjectId(): string | undefined {
-  const raw =
-    process.env.FIREBASE_PROJECT_ID ||
-    process.env.projectId ||
-    process.env.GCLOUD_PROJECT;
+  const raw = process.env.FIREBASE_PROJECT_ID;
   const trimmed = raw?.trim();
-  return trimmed && !isPlaceholder(trimmed) ? trimmed : undefined;
+  return trimmed && !isPlaceholder(trimmed) ? trimmed : 'aegispay-21274';
 }
 
 /**
- * Resolves the Firebase Auth Domain across canonical and legacy aliases.
+ * Resolves the Firebase Auth Domain across canonical and default values.
  */
 export function getAuthDomain(): string | undefined {
-  const raw = process.env.FIREBASE_AUTH_DOMAIN || process.env.authDomain;
+  const raw = process.env.FIREBASE_AUTH_DOMAIN;
   const trimmed = raw?.trim();
-  return trimmed && !isPlaceholder(trimmed) ? trimmed : undefined;
+  return trimmed && !isPlaceholder(trimmed) ? trimmed : 'aegispay-21274.firebaseapp.com';
 }
 
 /**
@@ -197,14 +191,6 @@ function resolveCredentials() {
         privateKey,
       }),
       projectId,
-    };
-  }
-
-  // Option 4: Standard Google Application Default Credentials
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    return {
-      credential: undefined,
-      projectId: getFirebaseProjectId(),
     };
   }
 

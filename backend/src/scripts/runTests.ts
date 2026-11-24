@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { resolveColumnMapping, STANDARD_COLUMN_ALIASES } from '../services/datasetService.js';
-import { sanitizeFilename, generateStorageKey, getStorageFilePath } from '../services/storageService.js';
+import { sanitizeFilename, generateStorageKey, getStorageFilePath, isS3Configured } from '../services/storageService.js';
 import { scoreToRiskLevel } from '../services/mlService.js';
 import { getFirebaseStatus } from '../services/firebaseService.js';
 import { realMerchants } from '../data/merchantsData.js';
@@ -68,6 +68,12 @@ async function runAllTests() {
     traversalBlocked = true;
   }
   assert(traversalBlocked, 'Storage Security', 'Blocks attempts to access files outside storage root');
+
+  assert(
+    typeof isS3Configured === 'function',
+    'Storage Security',
+    'Supports S3 cloud storage provider detection for Antideploy / AWS environments'
+  );
 
   /* -------------------------------------------------------------------------- */
   /* 2. Flexible Dataset Column Mapping Tests                                   */

@@ -52,7 +52,7 @@ const ml = pipe(
 // 2. Backend. PORT is pinned so an inherited PORT=0 in the parent shell cannot
 // move the API off :5000 (dotenv does not override existing env vars).
 console.log('\x1b[32m%s\x1b[0m', '[STARTING] Backend on http://127.0.0.1:5000 ...');
-const backendPort = process.env.BACKEND_PORT || '5000';
+const backendPort = process.env.PORT || '5000';
 const backend = pipe(
   spawn(npmCmd, ['run', 'dev'], {
     cwd: path.join(__dirname, 'backend'),
