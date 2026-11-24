@@ -83,6 +83,9 @@ export const SCENARIO_PARAMETERS: Record<string, ScenarioParameters> = {
 interface CatalogRow {
   id: SimMerchantId;
   displayName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   category: string;
   mcc: string;
   mccDescription: string;
@@ -107,20 +110,20 @@ const FALLBACK_CATALOG: CatalogFile = {
   city: 'Bengaluru',
   state: 'Karnataka',
   merchants: [
-    { id: 'SIM-0001', displayName: 'Aurora Bakehouse', category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 350000, onboardedAt: '2024-06-18', baselineAvgTicket: 205, baselineNightShare: 0.03, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
-    { id: 'SIM-0002', displayName: 'Maple Crumb Bakery', category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 900000, onboardedAt: '2023-02-09', baselineAvgTicket: 240, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0003', displayName: 'Nightowl Diner', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 1500000, onboardedAt: '2024-01-22', baselineAvgTicket: 760, baselineNightShare: 0.18, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
-    { id: 'SIM-0004', displayName: 'Copper Pot Kitchen', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 2100000, onboardedAt: '2023-11-03', baselineAvgTicket: 890, baselineNightShare: 0.11, scenario: 'monitor', network: null, isBettingFront: false },
-    { id: 'SIM-0005', displayName: 'Blue Kettle Cafe', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 480000, onboardedAt: '2024-04-11', baselineAvgTicket: 310, baselineNightShare: 0.01, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0006', displayName: 'Corner Bean Roasters', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 390000, onboardedAt: '2023-08-30', baselineAvgTicket: 285, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0007', displayName: 'Green Crate Express', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 620000, onboardedAt: '2024-02-17', baselineAvgTicket: 185, baselineNightShare: 0.12, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
-    { id: 'SIM-0008', displayName: 'Sunrise Provisions', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 740000, onboardedAt: '2023-06-05', baselineAvgTicket: 210, baselineNightShare: 0.05, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0009', displayName: 'Meridian Grocers', category: 'grocery', mcc: '5411', mccDescription: 'Grocery Stores & Supermarkets', declaredTurnoverMonthly: 4800000, onboardedAt: '2022-12-01', baselineAvgTicket: 640, baselineNightShare: 0.04, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0010', displayName: 'Lantern Pharmacy', category: 'pharmacy', mcc: '5912', mccDescription: 'Drug Stores & Pharmacies', declaredTurnoverMonthly: 1100000, onboardedAt: '2023-03-27', baselineAvgTicket: 470, baselineNightShare: 0.06, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0011', displayName: 'Pixel & Wire Electronics', category: 'electronics', mcc: '5732', mccDescription: 'Electronics Stores', declaredTurnoverMonthly: 2600000, onboardedAt: '2024-05-19', baselineAvgTicket: 6800, baselineNightShare: 0.03, scenario: 'monitor', network: null, isBettingFront: false },
-    { id: 'SIM-0012', displayName: 'Loom & Thread Apparel', category: 'clothing', mcc: '5651', mccDescription: 'Family Clothing Stores', declaredTurnoverMonthly: 1700000, onboardedAt: '2023-09-14', baselineAvgTicket: 1850, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
-    { id: 'SIM-0013', displayName: 'Harbour Rest Stop', category: 'hotel', mcc: '7011', mccDescription: 'Hotels & Motels', declaredTurnoverMonthly: 3400000, onboardedAt: '2023-05-08', baselineAvgTicket: 5400, baselineNightShare: 0.28, scenario: 'monitor', network: null, isBettingFront: false },
-    { id: 'SIM-0014', displayName: 'Velvet Tiger Snack Bar', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 980000, onboardedAt: '2024-03-02', baselineAvgTicket: 520, baselineNightShare: 0.15, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0001', displayName: "Thom's Bakery", osmRef: 'node/343089650', osmNodeId: 343089650, osmAddress: '# 1/2 Wheeler Road, Bengaluru, 560005', category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 350000, onboardedAt: '2024-06-18', baselineAvgTicket: 205, baselineNightShare: 0.03, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0002', displayName: 'Old Madras Baking Company', osmRef: 'node/428457212', osmNodeId: 428457212, osmAddress: "Saint Mark's Road, Bengaluru, 560001", category: 'bakery', mcc: '5462', mccDescription: 'Retail Bakeries & Pastry Shops', declaredTurnoverMonthly: 900000, onboardedAt: '2023-02-09', baselineAvgTicket: 240, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0003', displayName: 'Sukh Sagar', osmRef: 'node/306585721', osmNodeId: 306585721, osmAddress: 'Mahayogi Vemana Road, Bengaluru', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 1500000, onboardedAt: '2024-01-22', baselineAvgTicket: 760, baselineNightShare: 0.18, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0004', displayName: 'Nandhini', osmRef: 'node/312508904', osmNodeId: 312508904, osmAddress: '100 Feet Road, Bengaluru', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 2100000, onboardedAt: '2023-11-03', baselineAvgTicket: 890, baselineNightShare: 0.11, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0005', displayName: 'Cafe Coffee Day', osmRef: 'node/423744924', osmNodeId: 423744924, osmAddress: '100 Feet Road, Bengaluru', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 480000, onboardedAt: '2024-04-11', baselineAvgTicket: 310, baselineNightShare: 0.01, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0006', displayName: 'Cafe Moksh', osmRef: 'node/454163741', osmNodeId: 454163741, osmAddress: 'Bengaluru, Karnataka', category: 'cafe', mcc: '5814', mccDescription: 'Cafés, Coffee Shops & Fast Food', declaredTurnoverMonthly: 390000, onboardedAt: '2023-08-30', baselineAvgTicket: 285, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0007', displayName: 'Priti Departmental Store', osmRef: 'node/266472673', osmNodeId: 266472673, osmAddress: 'Outer Ring Road, Bengaluru', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 620000, onboardedAt: '2024-02-17', baselineAvgTicket: 185, baselineNightShare: 0.12, scenario: 'syndicate', network: 'RING-CRICKET', isBettingFront: true },
+    { id: 'SIM-0008', displayName: 'Fresh@Heritage', osmRef: 'node/519550433', osmNodeId: 519550433, osmAddress: 'Basaveshwara Nagar, Bengaluru', category: 'convenience', mcc: '5499', mccDescription: 'Miscellaneous Food Stores', declaredTurnoverMonthly: 740000, onboardedAt: '2023-06-05', baselineAvgTicket: 210, baselineNightShare: 0.05, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0009', displayName: 'Foodworld', osmRef: 'node/307411444', osmNodeId: 307411444, osmAddress: 'Bengaluru, Karnataka', category: 'grocery', mcc: '5411', mccDescription: 'Grocery Stores & Supermarkets', declaredTurnoverMonthly: 4800000, onboardedAt: '2022-12-01', baselineAvgTicket: 640, baselineNightShare: 0.04, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0010', displayName: 'Apollo Pharmacy', osmRef: 'node/316999477', osmNodeId: 316999477, osmAddress: 'HAL Airport Road, Bengaluru', category: 'pharmacy', mcc: '5912', mccDescription: 'Drug Stores & Pharmacies', declaredTurnoverMonthly: 1100000, onboardedAt: '2023-03-27', baselineAvgTicket: 470, baselineNightShare: 0.06, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0011', displayName: 'Adeshwara Electronics', osmRef: 'node/266472732', osmNodeId: 266472732, osmAddress: 'Bengaluru, Karnataka', category: 'electronics', mcc: '5732', mccDescription: 'Electronics Stores', declaredTurnoverMonthly: 2600000, onboardedAt: '2024-05-19', baselineAvgTicket: 6800, baselineNightShare: 0.03, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0012', displayName: 'Sansar Collections', osmRef: 'node/454141780', osmNodeId: 454141780, osmAddress: 'Bengaluru, Karnataka', category: 'clothing', mcc: '5651', mccDescription: 'Family Clothing Stores', declaredTurnoverMonthly: 1700000, onboardedAt: '2023-09-14', baselineAvgTicket: 1850, baselineNightShare: 0.02, scenario: 'honest', network: null, isBettingFront: false },
+    { id: 'SIM-0013', displayName: 'Gangothri Residency', osmRef: 'node/266324684', osmNodeId: 266324684, osmAddress: 'Outer Ring Road, Bengaluru', category: 'hotel', mcc: '7011', mccDescription: 'Hotels & Motels', declaredTurnoverMonthly: 3400000, onboardedAt: '2023-05-08', baselineAvgTicket: 5400, baselineNightShare: 0.28, scenario: 'monitor', network: null, isBettingFront: false },
+    { id: 'SIM-0014', displayName: 'Simply Native', osmRef: 'node/316999234', osmNodeId: 316999234, osmAddress: 'Paramahansa Yogananda Road, Bengaluru', category: 'restaurant', mcc: '5812', mccDescription: 'Eating Places & Restaurants', declaredTurnoverMonthly: 980000, onboardedAt: '2024-03-02', baselineAvgTicket: 520, baselineNightShare: 0.15, scenario: 'drift', network: 'RING-CRICKET', isBettingFront: true },
   ],
 };
 
@@ -286,6 +289,9 @@ export const simulatedMerchants: SimulatedMerchant[] = catalog.merchants.map(row
     id: row.id,
     dataOrigin: 'simulated',
     displayName: row.displayName,
+    osmRef: row.osmRef,
+    osmAddress: row.osmAddress,
+    osmNodeId: row.osmNodeId,
     category: row.category,
     categoryLabel: row.category.charAt(0).toUpperCase() + row.category.slice(1),
     mcc: row.mcc,

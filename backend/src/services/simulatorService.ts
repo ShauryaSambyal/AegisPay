@@ -66,15 +66,38 @@ const buildInitialTransactions = (): Transaction[] => {
       const amount = suspicious
         ? pick(rng, [1000, 2500, 5000, 10000, 5000, 1000])
         : Math.round(merchant.baseline.avgTicket * (0.6 + rng() * 1.1));
-      const hour = suspicious && rng() < 0.7 ? 22 + Math.floor(rng() * 4) : 9 + Math.floor(rng() * 11);
-      const timestamp = new Date(now - (merchantIndex * 60 + i * 7) * 60_000);
-      timestamp.setHours(hour % 24, Math.floor(rng() * 60), 0, 0);
+
+      // Distribute dates across the last 7 days up to today (Nov 18 - Nov 24, 2026)
+      const dayOffset = (merchantIndex * 2 + i) % 7;
+      const timestamp = new Date(now - dayOffset * 86_400_000);
+
+      // Varied hours providing a natural, balanced mix of AM and PM
+      let hour: number;
+      if (suspicious) {
+        // Suspicious activity: night-time match bursts (PM/AM) and occasional mid-day testing
+        const hoursCycle = [23, 0, 1, 14]; // 11 PM, 12 AM, 1 AM, 2 PM
+        hour = (hoursCycle[i % hoursCycle.length] + Math.floor(rng() * 2)) % 24;
+      } else {
+        // Honest retail: morning rush (AM), lunch/afternoon (PM), evening shopping (PM), early morning (AM)
+        const hoursCycle = [9, 13, 18, 10]; // 9 AM, 1 PM, 6 PM, 10 AM
+        hour = (hoursCycle[i % hoursCycle.length] + Math.floor(rng() * 2)) % 24;
+      }
+
+      const minute = Math.floor(rng() * 60);
+      const second = 10 + Math.floor(rng() * 49);
+      timestamp.setHours(hour, minute, second, 0);
+
+      const isNight = hour >= 22 || hour <= 4;
+      const isMatch = suspicious && (hour >= 20 || hour <= 2);
 
       transactions.push({
         id: `TXN-SIM-${merchant.id.slice(4)}-${String(i + 1).padStart(3, '0')}`,
         dataOrigin: 'simulated',
         merchantId: merchant.id,
         merchantName: merchant.displayName,
+        osmRef: merchant.osmRef,
+        osmAddress: merchant.osmAddress,
+        osmNodeId: merchant.osmNodeId,
         amount,
         currency: 'INR',
         paymentMethod: pick(rng, paymentMethods),
@@ -85,8 +108,8 @@ const buildInitialTransactions = (): Transaction[] => {
         payerState: place.state,
         timestamp: timestamp.toISOString(),
         isRoundAmount: amount % 500 === 0 && amount >= 500,
-        isNightTime: hour % 24 >= 22 || hour % 24 <= 3,
-        isMatchWindow: suspicious && rng() < 0.5,
+        isNightTime: isNight,
+        isMatchWindow: isMatch,
         riskScore: suspicious ? tierForScore(merchant.riskScore) && Math.min(99, merchant.riskScore + 5) : Math.max(2, merchant.riskScore),
         anomalyFlags: suspicious
           ? ['SIMULATED_MATCH_WINDOW_BURST', 'SIMULATED_OUT_OF_STATE_PAYER']
@@ -190,15 +213,20 @@ export class SimulatorService {
       index: number,
       flags: string[],
       riskScore: number,
-      suspicious: boolean
+      suspicious: boolean,
+      customTimestamp?: Date
     ): void => {
+      const merchant = findSimulatedMerchant(merchantId);
       const place = suspicious ? pick(rng, CITIES_OUT_OF_STATE) : { city: 'Bengaluru', state: 'Karnataka' };
-      const timestamp = new Date(now - index * 12_000);
+      const timestamp = customTimestamp || new Date(now - index * 12_000);
       const transaction: Transaction = {
         id: `TXN-${scenario}-${timestamp.getTime()}-${index}`,
         dataOrigin: 'simulated',
         merchantId: merchantId as Transaction['merchantId'],
         merchantName: nameOf(merchantId),
+        osmRef: merchant?.osmRef,
+        osmAddress: merchant?.osmAddress,
+        osmNodeId: merchant?.osmNodeId,
         amount,
         currency: 'INR',
         paymentMethod: suspicious ? 'UPI' : pick(rng, paymentMethods),
@@ -209,7 +237,7 @@ export class SimulatorService {
         payerState: place.state,
         timestamp: timestamp.toISOString(),
         isRoundAmount: amount % 500 === 0 && amount >= 500,
-        isNightTime: suspicious,
+        isNightTime: timestamp.getHours() >= 22 || timestamp.getHours() <= 4,
         isMatchWindow: suspicious,
         riskScore,
         anomalyFlags: flags,
@@ -220,14 +248,29 @@ export class SimulatorService {
 
     if (scenario === 'IPL_BETTING_BURST') {
       const merchantId = targets[0];
+      // Burst across death-overs and midnight post-match settlements showing both PM and AM
+      const burstHours = [
+        { h: 23, m: 18, s: 24 }, // 11:18 PM
+        { h: 23, m: 35, s: 12 }, // 11:35 PM
+        { h: 23, m: 49, s: 45 }, // 11:49 PM
+        { h: 23, m: 58, s: 30 }, // 11:58 PM
+        { h: 0, m: 14, s: 15 },  // 12:14 AM
+        { h: 0, m: 32, s: 50 },  // 12:32 AM
+        { h: 0, m: 55, s: 10 },  // 12:55 AM
+        { h: 1, m: 24, s: 40 },  // 01:24 AM
+      ];
       for (let i = 0; i < 8; i++) {
+        const timeConfig = burstHours[i];
+        const date = new Date(now);
+        date.setHours(timeConfig.h, timeConfig.m, timeConfig.s, 0);
         push(
           merchantId,
           pick(rng, [1000, 2500, 5000, 10000, 15000, 20000]),
           i,
           ['SIMULATED_MATCH_OVER_BURST', 'SIMULATED_OUT_OF_STATE_PAYER', 'SIMULATED_ROUND_STAKE'],
           92 + Math.floor(rng() * 7),
-          true
+          true,
+          date
         );
       }
       return {
@@ -241,8 +284,19 @@ export class SimulatorService {
 
     if (scenario === 'FESTIVE_BAKERY_RUSH') {
       const merchantId = targets[0];
+      const festiveTimes = [
+        { h: 8, m: 35, s: 20 },  // 08:35 AM
+        { h: 9, m: 42, s: 15 },  // 09:42 AM
+        { h: 10, m: 55, s: 40 }, // 10:55 AM
+        { h: 11, m: 48, s: 10 }, // 11:48 AM
+        { h: 13, m: 15, s: 35 }, // 01:15 PM
+        { h: 14, m: 40, s: 22 }, // 02:40 PM
+      ];
       [240, 399, 485, 750, 1150, 1380].forEach((amount, i) => {
-        push(merchantId, amount, i, [], 5 + Math.floor(rng() * 8), false);
+        const timeConfig = festiveTimes[i];
+        const date = new Date(now);
+        date.setHours(timeConfig.h, timeConfig.m, timeConfig.s, 0);
+        push(merchantId, amount, i, [], 5 + Math.floor(rng() * 8), false, date);
       });
       return {
         message: `Injected 6 simulated daytime café/bakery orders into ${nameOf(merchantId)} as the honest control.`,
@@ -253,14 +307,18 @@ export class SimulatorService {
       };
     }
 
+    const smurfMinutes = [42, 43, 44];
     targets.forEach((merchantId, index) => {
+      const date = new Date(now);
+      date.setHours(23, smurfMinutes[index % smurfMinutes.length], 15 + index * 10, 0);
       push(
         merchantId,
         5000,
         index,
         ['SIMULATED_CROSS_MERCHANT_SMURFING', 'SIMULATED_SHARED_DEVICE', 'SIMULATED_SYNCHRONIZED_DEPOSIT'],
         97,
-        true
+        true,
+        date
       );
     });
     return {

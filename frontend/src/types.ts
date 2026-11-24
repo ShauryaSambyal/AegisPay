@@ -132,6 +132,9 @@ export interface SimulatedMerchant {
   id: SimMerchantId;
   dataOrigin: 'simulated';
   displayName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   category: string;
   categoryLabel: string;
   mcc: string;
@@ -159,6 +162,9 @@ export interface Transaction {
   dataOrigin: 'simulated';
   merchantId: SimMerchantId;
   merchantName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   amount: number;
   currency: string;
   paymentMethod: PaymentMethod;
@@ -240,6 +246,9 @@ export interface AIInvestigationReport {
   dataOrigin: 'simulated';
   merchantId: SimMerchantId;
   merchantName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   investigationDate: string;
   executiveSummary: string;
   driftVerdict: 'CONFIRMED_BETTING_FRONT' | 'GENUINE_SEASONAL_SURGE' | 'NEEDS_FURTHER_MONITORING';

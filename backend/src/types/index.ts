@@ -92,6 +92,9 @@ export interface SimulatedMerchant {
   id: SimMerchantId;
   dataOrigin: 'simulated';
   displayName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   category: string;
   categoryLabel: string;
   mcc: string;
@@ -122,6 +125,9 @@ export interface Transaction {
   dataOrigin: 'simulated';
   merchantId: SimMerchantId;
   merchantName: string;
+  osmRef?: string;
+  osmAddress?: string;
+  osmNodeId?: number;
   amount: number;
   currency: string;
   paymentMethod: PaymentMethod;
