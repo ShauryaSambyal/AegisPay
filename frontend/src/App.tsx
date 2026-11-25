@@ -166,20 +166,15 @@ export const App: React.FC = () => {
     try {
       const message = await runScenario(scenario);
       await fetchData();
-      setToast({
-        scenario,
-        title:
-          scenario === 'RESET'
-            ? 'Simulation reset'
-            : scenario === 'FESTIVE_BAKERY_RUSH'
-              ? 'Honest-control payments injected'
-              : scenario === 'IPL_BETTING_BURST'
-                ? 'Match-window payments injected'
-                : 'Cross-merchant deposits injected',
-        description: message,
-        badge: scenario === 'RESET' ? 'Reset' : 'Simulated data',
-        type: scenario === 'FESTIVE_BAKERY_RUSH' ? 'success' : scenario === 'RESET' ? 'info' : 'danger',
-      });
+      if (scenario === 'RESET') {
+        setToast({
+          scenario,
+          title: 'Simulation reset',
+          description: message,
+          badge: 'Reset',
+          type: 'info',
+        });
+      }
     } catch (error) {
       setToast({
         scenario,

@@ -74,9 +74,9 @@ const buildInitialTransactions = (): Transaction[] => {
       // Varied hours providing a natural, balanced mix of AM and PM
       let hour: number;
       if (suspicious) {
-        // Suspicious activity: night-time match bursts (PM/AM) and occasional mid-day testing
-        const hoursCycle = [23, 0, 1, 14]; // 11 PM, 12 AM, 1 AM, 2 PM
-        hour = (hoursCycle[i % hoursCycle.length] + Math.floor(rng() * 2)) % 24;
+        // Suspicious activity: evening/night match bursts (all PM)
+        const hoursCycle = [20, 21, 22, 23]; // 8 PM, 9 PM, 10 PM, 11 PM
+        hour = hoursCycle[i % hoursCycle.length];
       } else {
         // Honest retail: morning rush (AM), lunch/afternoon (PM), evening shopping (PM), early morning (AM)
         const hoursCycle = [9, 13, 18, 10]; // 9 AM, 1 PM, 6 PM, 10 AM
@@ -88,14 +88,13 @@ const buildInitialTransactions = (): Transaction[] => {
       timestamp.setHours(hour, minute, second, 0);
 
       const isNight = hour >= 22 || hour <= 4;
-      const isMatch = suspicious && (hour >= 20 || hour <= 2);
+      const isMatch = suspicious && hour >= 20;
 
       transactions.push({
         id: `TXN-SIM-${merchant.id.slice(4)}-${String(i + 1).padStart(3, '0')}`,
         dataOrigin: 'simulated',
         merchantId: merchant.id,
         merchantName: merchant.displayName,
-        osmRef: merchant.osmRef,
         osmAddress: merchant.osmAddress,
         osmNodeId: merchant.osmNodeId,
         amount,
@@ -118,7 +117,13 @@ const buildInitialTransactions = (): Transaction[] => {
     }
   });
 
-  return transactions.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 200);
+  return transactions
+    .sort((a, b) => {
+      if (a.merchantId === 'SIM-0001' && b.merchantId !== 'SIM-0001') return -1;
+      if (b.merchantId === 'SIM-0001' && a.merchantId !== 'SIM-0001') return 1;
+      return b.timestamp.localeCompare(a.timestamp);
+    })
+    .slice(0, 200);
 };
 
 let activeTransactions: Transaction[] = buildInitialTransactions();
@@ -220,11 +225,10 @@ export class SimulatorService {
       const place = suspicious ? pick(rng, CITIES_OUT_OF_STATE) : { city: 'Bengaluru', state: 'Karnataka' };
       const timestamp = customTimestamp || new Date(now - index * 12_000);
       const transaction: Transaction = {
-        id: `TXN-${scenario}-${timestamp.getTime()}-${index}`,
+        id: `TXN-${scenario}-${injectionCounter}-${timestamp.getTime()}-${index}`,
         dataOrigin: 'simulated',
         merchantId: merchantId as Transaction['merchantId'],
         merchantName: nameOf(merchantId),
-        osmRef: merchant?.osmRef,
         osmAddress: merchant?.osmAddress,
         osmNodeId: merchant?.osmNodeId,
         amount,
@@ -248,16 +252,16 @@ export class SimulatorService {
 
     if (scenario === 'IPL_BETTING_BURST') {
       const merchantId = targets[0];
-      // Burst across death-overs and midnight post-match settlements showing both PM and AM
+      // Match outburst across evening/night match overs (all PM)
       const burstHours = [
-        { h: 23, m: 18, s: 24 }, // 11:18 PM
-        { h: 23, m: 35, s: 12 }, // 11:35 PM
-        { h: 23, m: 49, s: 45 }, // 11:49 PM
-        { h: 23, m: 58, s: 30 }, // 11:58 PM
-        { h: 0, m: 14, s: 15 },  // 12:14 AM
-        { h: 0, m: 32, s: 50 },  // 12:32 AM
-        { h: 0, m: 55, s: 10 },  // 12:55 AM
-        { h: 1, m: 24, s: 40 },  // 01:24 AM
+        { h: 20, m: 12, s: 24 }, // 08:12 PM
+        { h: 20, m: 45, s: 12 }, // 08:45 PM
+        { h: 21, m: 18, s: 45 }, // 09:18 PM
+        { h: 21, m: 52, s: 30 }, // 09:52 PM
+        { h: 22, m: 14, s: 15 }, // 10:14 PM
+        { h: 22, m: 38, s: 50 }, // 10:38 PM
+        { h: 23, m: 15, s: 10 }, // 11:15 PM
+        { h: 23, m: 48, s: 40 }, // 11:48 PM
       ];
       for (let i = 0; i < 8; i++) {
         const timeConfig = burstHours[i];

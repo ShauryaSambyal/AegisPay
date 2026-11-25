@@ -117,7 +117,7 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
     <div className="space-y-8 animate-fade-in">
       <section className="pt-4 pb-2">
         <div className="pb-6 border-b border-white/[0.08] space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="bf-kicker text-neutral-400">[ 06 / AI FORENSIC INVESTIGATION ]</span>
             <span className={`text-xs font-mono flex items-center gap-1 ${isReal ? 'text-sky-300' : 'text-rose-300'}`}>
               {isReal ? <Store className="w-3 h-3" /> : <FlaskConical className="w-3 h-3" />}
@@ -151,10 +151,10 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
         </div>
 
         {/* The Dropdown Container */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative w-full sm:w-auto" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`w-full sm:w-auto min-w-[280px] max-w-md flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs font-mono transition-all border shadow-md ${
+            className={`w-full sm:w-auto sm:min-w-[280px] max-w-md flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs font-mono transition-all border shadow-md ${
               dropdownOpen
                 ? 'bg-[#2a2a3a] text-white border-[#4d4d68]'
                 : 'bg-[#181822] hover:bg-[#222230] text-white border-[#2e2e40]'
@@ -182,7 +182,7 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: -4 }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute right-0 sm:left-auto left-0 mt-2 w-80 sm:w-[24rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-3 z-50 ring-1 ring-[#3b3b54]"
+                className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-[24rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-3 z-50 ring-1 ring-[#3b3b54]"
               >
                 {/* Search Bar */}
                 <div className="relative mb-2.5">
@@ -287,7 +287,7 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
           <div className="bf-card rounded-2xl p-5 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
                   <h2 className="text-lg font-bold text-white">
                     {selectedReal ? selectedReal.name : selectedSim?.displayName}
                   </h2>

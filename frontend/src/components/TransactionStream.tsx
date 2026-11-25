@@ -138,7 +138,6 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
       transaction.merchantId,
       transaction.payerId,
       transaction.id,
-      transaction.osmRef || '',
       transaction.osmAddress || '',
       transaction.payerCity || '',
       transaction.payerState || '',
@@ -159,10 +158,10 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
       <section className="pt-4 pb-2">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
           <div className="max-w-3xl space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="bf-kicker text-neutral-400">[ 02 / PAYMENT STREAM ]</span>
               <span className="text-xs font-mono text-emerald-400 flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> OPENSTREETMAP BUSINESS TELEMETRY
+                <MapPin className="w-3 h-3 shrink-0" /> OPENSTREETMAP BUSINESS TELEMETRY
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
@@ -170,7 +169,7 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
             </h1>
             <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
               Every payment monitors real businesses catalogued from OpenStreetMap with telemetry simulating behavioral
-              drift and anomaly scenarios. Use the scenario triggers to inject real-time match bursts, festive rushes, or
+              drift and anomaly scenarios. Use the scenario triggers to inject real-time match outbursts, festive rushes, or
               cross-merchant mule smurfs.
             </p>
           </div>
@@ -180,7 +179,7 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
               disabled={isSimulating}
               className="bf-pill-btn text-rose-300 border-rose-500/30 text-xs flex items-center gap-1.5 disabled:opacity-40"
             >
-              <Flame className="w-3.5 h-3.5" /> Match burst
+              <Flame className="w-3.5 h-3.5" /> Match outburst
             </button>
             <button
               onClick={() => onSimulate('FESTIVE_BAKERY_RUSH')}
@@ -233,9 +232,9 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
         </div>
       </section>
 
-      <section className="bf-card rounded-2xl p-6 space-y-5">
+      <section className="bf-card rounded-2xl p-4 sm:p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-neutral-500" />
             {[
               { id: 'ALL', label: `All (${transactions.length})` },
@@ -255,7 +254,7 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
             <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-2.5" />
             <input
               type="text"
-              placeholder="Search business, OSM ref, payment id, payer..."
+              placeholder="Search business, payment id, payer..."
               value={searchQuery}
               onChange={event => setSearchQuery(event.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-full bg-neutral-900 border border-white/[0.08] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white/30"
@@ -263,7 +262,97 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile card layout */}
+        <div className="md:hidden space-y-3">
+          {filtered.map(transaction => {
+            const { dateStr, timeStr, ampm, isPM } = parsePaymentTimestamp(transaction.timestamp);
+            return (
+              <div key={transaction.id} className="p-4 rounded-xl bg-neutral-900/60 border border-white/[0.08] space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-white text-sm truncate">{transaction.merchantName}</div>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span className="text-[10px] font-mono text-neutral-500">{transaction.merchantId}</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`shrink-0 px-2.5 py-1 rounded text-[11px] font-mono font-bold border ${
+                      transaction.riskScore >= 80
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/35'
+                        : transaction.riskScore >= 50
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/35'
+                          : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
+                    }`}
+                  >
+                    {transaction.riskScore}/100
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.06]">
+                  <div>
+                    <div className="font-mono font-bold text-white text-sm">
+                      ₹{transaction.amount.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[10px] font-mono text-neutral-500 uppercase">{transaction.paymentMethod}</div>
+                  </div>
+                  <div className="text-right font-mono">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span className="text-[11px] text-neutral-200 font-semibold">{timeStr}</span>
+                      <span
+                        className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase border ${
+                          isPM
+                            ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                            : 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+                        }`}
+                      >
+                        {ampm}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-neutral-400 mt-0.5">{dateStr}</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-neutral-400">
+                  <span className={transaction.riskScore >= 70 ? 'text-rose-400 font-semibold' : 'text-neutral-300'}>
+                    {transaction.id.slice(-14)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-2.5 h-2.5 text-neutral-500 shrink-0" />
+                    {transaction.payerId} · {transaction.payerCity}, {transaction.payerState}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 items-center pt-1">
+                  {transaction.anomalyFlags.length ? (
+                    transaction.anomalyFlags.map((flag, index) => {
+                      const { label, icon: FlagIcon, style } = formatFlag(flag);
+                      return (
+                        <span
+                          key={index}
+                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium border ${style}`}
+                        >
+                          <FlagIcon className="w-3 h-3 shrink-0" />
+                          {label}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                      Verified Retail Pattern
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <p className="text-xs font-mono text-neutral-500 py-6">No payments match this search or filter.</p>
+          )}
+        </div>
+
+        {/* Desktop table layout */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="text-neutral-500 font-mono text-[10px] uppercase border-b border-white/[0.08]">
               <tr>
@@ -313,10 +402,6 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
                   <td className="py-3 px-3">
                     <div className="font-semibold text-white text-[13px]">{transaction.merchantName}</div>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                        <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
-                        {transaction.osmRef || 'OSM POI'}
-                      </span>
                       <span className="text-[10px] font-mono text-neutral-500">{transaction.merchantId}</span>
                     </div>
                     {transaction.osmAddress && (

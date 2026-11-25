@@ -537,27 +537,11 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
     setBurstRatio(p.values.burstSyncRatio);
     setVolumeMult(p.values.volumeMultiplier);
     setSuspectedFlag(p.values.suspectedBettingActivity);
-
-    // Immediately trigger prediction with new preset parameters
-    runPredict({
-      nightShare: p.values.nightShare,
-      roundAmountRatio: p.values.roundAmountRatio,
-      outOfStateShare: p.values.outOfStateShare,
-      repeatPayerRatio: p.values.repeatPayerRatio,
-      burstSyncRatio: p.values.burstSyncRatio,
-      volumeMultiplier: p.values.volumeMultiplier,
-      suspectedBettingActivity: p.values.suspectedBettingActivity,
-    });
   };
 
   const handlePredict = () => {
     runPredict();
   };
-
-  // Run initial prediction on mount unconditionally
-  useEffect(() => {
-    runPredict();
-  }, []);
 
   const effectiveModelInfo = modelInfo || defaultModelInfo;
   const timeHoldout = effectiveModelInfo.metrics?.splits?.time_holdout ?? null;
@@ -570,7 +554,7 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
       <section className="pt-4 pb-2">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-[#242430]">
           <div className="max-w-3xl space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="bf-kicker text-neutral-400">[ 05 / ML PREDICTOR & INSIGHTS ]</span>
               <span className={`text-xs font-mono flex items-center gap-1.5 font-medium ${mlOnline ? 'text-emerald-400' : 'text-indigo-400'}`}>
                 <span className={`w-2 h-2 rounded-full ${mlOnline ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
@@ -611,12 +595,11 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
           </div>
 
           {/* Mode Toggle */}
-          <div className="inline-flex rounded-xl bg-[#161620] p-1 border border-[#2b2b3d] shrink-0">
+          <div className="flex sm:inline-flex w-full sm:w-auto rounded-xl bg-[#161620] p-1 border border-[#2b2b3d] shrink-0">
             <button
               type="button"
               onClick={() => {
                 setInputMode('custom');
-                runPredict({ inputMode: 'custom' });
               }}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
                 inputMode === 'custom'
@@ -630,7 +613,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
               type="button"
               onClick={() => {
                 setInputMode('catalog');
-                runPredict({ inputMode: 'catalog' });
               }}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
                 inputMode === 'catalog'
@@ -655,9 +637,7 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                   type="text"
                   value={customBusinessName}
                   onChange={e => {
-                    const val = e.target.value;
-                    setCustomBusinessName(val);
-                    runPredict({ businessName: val });
+                    setCustomBusinessName(e.target.value);
                   }}
                   placeholder="e.g. Royal Flush Sports Betting Club, Bangalore Silks..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#14141e] border border-[#2e2e44] text-white text-xs font-mono focus:border-indigo-400 focus:outline-none"
@@ -703,7 +683,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                                   onClick={() => {
                                     setCustomCategory(cat.value);
                                     setCategoryDropdownOpen(false);
-                                    runPredict({ category: cat.value });
                                   }}
                                   className={`w-full flex items-center justify-between gap-3 p-2 rounded-xl text-left transition-colors border ${
                                     isActive
@@ -834,7 +813,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                                   onClick={() => {
                                     setSelectedMerchantId(item.id);
                                     setBusinessDropdownOpen(false);
-                                    runPredict({ merchantId: item.id });
                                   }}
                                   className={`w-full flex items-center justify-between gap-2.5 p-2 rounded-xl text-left transition-colors border ${
                                     isActive
@@ -916,7 +894,7 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
 
             {/* Indicator Fine-Tuning Drawer / Sliders */}
             <div className="p-4 rounded-xl bg-[#14141e] border border-[#28283a] space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
                   <Sliders className="w-3.5 h-3.5 text-emerald-400" /> Model Feature Indicators & Inflow Parameters
                 </span>
@@ -940,7 +918,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 100;
                       setNightShare(val);
                       setActivePreset('custom');
-                      runPredict({ nightShare: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -960,7 +937,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 100;
                       setRoundRatio(val);
                       setActivePreset('custom');
-                      runPredict({ roundAmountRatio: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -980,7 +956,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 100;
                       setOutOfStateShare(val);
                       setActivePreset('custom');
-                      runPredict({ outOfStateShare: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -1000,7 +975,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 100;
                       setRepeatRatio(val);
                       setActivePreset('custom');
-                      runPredict({ repeatPayerRatio: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -1020,7 +994,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 100;
                       setBurstRatio(val);
                       setActivePreset('custom');
-                      runPredict({ burstSyncRatio: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -1040,7 +1013,6 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                       const val = Number(e.target.value) / 10;
                       setVolumeMult(val);
                       setActivePreset('custom');
-                      runPredict({ volumeMultiplier: val });
                     }}
                     className="w-full accent-indigo-400"
                   />
@@ -1158,7 +1130,7 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                 </div>
 
                 {/* Score Component Breakdown */}
-                <div className="grid grid-cols-3 gap-3 text-xs font-mono">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                   <div className="p-3.5 rounded-xl bg-[#14141e] border border-[#28283a]">
                     <span className="text-neutral-400 block text-[10px] uppercase">Calibrated ML Model</span>
                     <span className="text-xl font-bold text-white mt-0.5 block">{score.components.model}%</span>

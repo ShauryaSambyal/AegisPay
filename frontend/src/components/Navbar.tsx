@@ -79,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="flex items-center space-x-1.5">
                 <span className="font-bold text-sm sm:text-base tracking-tight text-white">AEGISPAY</span>
-                <span className="text-[9px] uppercase font-mono tracking-widest px-1.5 py-0.5 rounded-full border border-white/20 text-neutral-300">
+                <span className="hidden sm:inline-block text-[9px] uppercase font-mono tracking-widest px-1.5 py-0.5 rounded-full border border-white/20 text-neutral-300">
                   SENTINEL
                 </span>
               </div>
@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className={`text-[10px] hidden md:inline ${isOpen ? 'text-neutral-300' : 'text-neutral-400'}`}>
                   {current.num} /
                 </span>
-                <span className="font-semibold tracking-tight truncate max-w-[140px] sm:max-w-none">{current.label}</span>
+                <span className="font-semibold tracking-tight truncate max-w-[100px] sm:max-w-none">{current.label}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-white' : 'text-neutral-400'}`} />
               </button>
 
@@ -110,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -4 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                    className="absolute left-0 mt-2 w-72 sm:w-[23rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]"
+                    className="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:left-0 sm:top-auto sm:mt-2 sm:w-[23rem] rounded-2xl bg-[#121218]/95 backdrop-blur-xl border border-[#2e2e42] shadow-2xl p-2.5 z-50 ring-1 ring-[#3b3b54]"
                   >
                     <div className="space-y-1.5">
                       {navItems.map(item => {
