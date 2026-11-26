@@ -298,6 +298,8 @@ export const App: React.FC = () => {
               <AIForensicInspector
                 simulatedMerchants={simulatedMerchants}
                 realMerchants={realMerchants}
+                transactions={transactions}
+                syndicateGraph={syndicateGraph}
                 selectedMerchantId={selectedMerchantId}
                 onSelectMerchant={setSelectedMerchantId}
                 report={aiReport}

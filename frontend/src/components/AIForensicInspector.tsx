@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Bot, FileText, FlaskConical, ShieldAlert, Sparkles, ChevronDown, Check, Search, Building2, MapPin, Store, ShieldCheck } from 'lucide-react';
+import { Bot, FileText, FlaskConical, ShieldAlert, Sparkles, ChevronDown, Check, Search, Building2, Store, ShieldCheck, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AIInvestigationReport, RealMerchant, SimulatedMerchant } from '../types';
+import { AIInvestigationReport, RealMerchant, SimulatedMerchant, SyndicateGraphType, Transaction } from '../types';
 import { tierClasses, tierLabel } from '../merchantVisuals';
+import { generateInvestigationPdf } from '../utils/generateInvestigationPdf';
 
 interface AIForensicInspectorProps {
   simulatedMerchants: SimulatedMerchant[];
   realMerchants?: RealMerchant[];
+  transactions?: Transaction[];
+  syndicateGraph?: SyndicateGraphType | null;
   selectedMerchantId: string;
   onSelectMerchant: (merchantId: string) => void;
   report: AIInvestigationReport | null;
@@ -24,6 +27,8 @@ const severityClasses: Record<string, string> = {
 export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
   simulatedMerchants,
   realMerchants = [],
+  transactions = [],
+  syndicateGraph = null,
   selectedMerchantId,
   onSelectMerchant,
   report,
@@ -111,6 +116,19 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
   const selectMerchant = (id: string) => {
     onSelectMerchant(id);
     setDropdownOpen(false);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!report) return;
+    const reportSim = simulatedMerchants.find(m => m.id === report.merchantId) ?? null;
+    const reportReal = realMerchants.find(m => (m.id as string) === report.merchantId) ?? null;
+    generateInvestigationPdf({
+      report,
+      simulatedMerchant: reportSim ?? (!reportReal ? selectedSim ?? null : null),
+      realMerchant: reportReal ?? (!reportSim ? selectedReal ?? null : null),
+      transactions,
+      syndicateGraph,
+    });
   };
 
   return (
@@ -305,7 +323,7 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
                     : `${selectedSim?.id} · ${selectedSim?.mccDescription} · ${selectedSim?.city}, ${selectedSim?.state}`}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => onRunInvestigation(selectedReal ? selectedReal.id : selectedSim!.id)}
                   disabled={isLoading}
@@ -313,6 +331,17 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
                 >
                   <Bot className="w-3.5 h-3.5" /> {isLoading ? 'Running Forensic Audit...' : 'Generate AI Report'}
                 </button>
+                {report && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    disabled={isLoading}
+                    className="bf-pill-btn text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-40 shadow-lg cursor-pointer font-semibold"
+                    title="Download full business forensic report as PDF"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download PDF
+                  </button>
+                )}
               </div>
             </div>
             <p className="text-[11px] text-neutral-400">
