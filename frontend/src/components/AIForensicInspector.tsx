@@ -38,7 +38,14 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filterSource, setFilterSource] = useState<'ALL' | 'SIM' | 'OSM'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [reportGenerationTick, setReportGenerationTick] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (report && !isLoading) {
+      setReportGenerationTick(prev => prev + 1);
+    }
+  }, [report, isLoading]);
 
   // Close dropdown on outside click or Escape
   useEffect(() => {
@@ -301,123 +308,159 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
 
       {/* Main Investigation Panel */}
       <div className="space-y-4">
-        {selected && (
-          <div className="bf-card rounded-2xl p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <h2 className="text-lg font-bold text-white">
-                    {selectedReal ? selectedReal.name : selectedSim?.displayName}
-                  </h2>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
-                    isReal
-                      ? 'border-sky-500/40 bg-sky-500/10 text-sky-200'
-                      : tierClasses(selectedSim?.riskTier ?? 'TIER_0_SAFE')
-                  }`}>
-                    {isReal ? 'OPENSTREETMAP SHOP · COMMERCIAL RECORD' : tierLabel(selectedSim?.riskTier ?? 'TIER_0_SAFE')}
+        <AnimatePresence mode="wait">
+          {selected && (
+            <motion.div
+              key={`merchant-${selected.id}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="bf-card rounded-2xl p-5 space-y-3"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h2 className="text-lg font-bold text-white">
+                      {selectedReal ? selectedReal.name : selectedSim?.displayName}
+                    </h2>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                      isReal
+                        ? 'border-sky-500/40 bg-sky-500/10 text-sky-200'
+                        : tierClasses(selectedSim?.riskTier ?? 'TIER_0_SAFE')
+                    }`}>
+                      {isReal ? 'OPENSTREETMAP SHOP · COMMERCIAL RECORD' : tierLabel(selectedSim?.riskTier ?? 'TIER_0_SAFE')}
+                    </span>
+                  </div>
+                  <p className="text-[11px] font-mono text-neutral-400">
+                    {isReal
+                      ? `${selectedReal?.categoryLabel} · ${selectedReal?.address || 'Bengaluru, Karnataka'} · OSM ID: ${selectedReal?.osmId}`
+                      : `${selectedSim?.id} · ${selectedSim?.mccDescription} · ${selectedSim?.city}, ${selectedSim?.state}`}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => onRunInvestigation(selectedReal ? selectedReal.id : selectedSim!.id)}
+                    disabled={isLoading}
+                    className="bf-pill-btn bf-pill-btn-primary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-40 shadow-lg cursor-pointer font-bold"
+                  >
+                    <Bot className="w-3.5 h-3.5" /> {isLoading ? 'Running Forensic Audit...' : 'Generate AI Report'}
+                  </button>
+                  {report && (
+                    <button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      disabled={isLoading}
+                      className="bf-pill-btn text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-40 shadow-lg cursor-pointer font-semibold"
+                      title="Download full business forensic report as PDF"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download PDF
+                    </button>
+                  )}
+                </div>
+              </div>
+              <p className="text-[11px] text-neutral-400">
+                {isReal ? (
+                  <span className="flex items-center gap-1 text-emerald-400 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Honest retail commercial baseline · Verified OpenStreetMap entity
+                  </span>
+                ) : (
+                  <>
+                    Rule-based drift score: <span className="font-mono text-white">{selectedSim?.riskScore}/100</span> ·
+                    baseline source: <span className="font-mono">{selectedSim?.baseline.source}</span>
+                  </>
+                )}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key={`loading-${selectedMerchantId}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="bf-card rounded-2xl p-12 text-center text-neutral-400 text-xs font-mono"
+            >
+              Generating forensic AI investigation report...
+            </motion.div>
+          ) : report ? (
+            <motion.div
+              key={`report-${report.merchantId}-${reportGenerationTick}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-4"
+            >
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="bf-kicker">[ EXECUTIVE SUMMARY ]</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 font-bold">
+                    {report.driftVerdict.split('_').join(' ')}
                   </span>
                 </div>
-                <p className="text-[11px] font-mono text-neutral-400">
-                  {isReal
-                    ? `${selectedReal?.categoryLabel} · ${selectedReal?.address || 'Bengaluru, Karnataka'} · OSM ID: ${selectedReal?.osmId}`
-                    : `${selectedSim?.id} · ${selectedSim?.mccDescription} · ${selectedSim?.city}, ${selectedSim?.state}`}
+                <p className="text-sm text-neutral-200 leading-relaxed">{report.executiveSummary}</p>
+                <p className="text-[10px] font-mono text-neutral-500">
+                  {report.merchantId} · confidence {report.confidenceScore}/100 · verified behavioural model
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => onRunInvestigation(selectedReal ? selectedReal.id : selectedSim!.id)}
-                  disabled={isLoading}
-                  className="bf-pill-btn bf-pill-btn-primary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-40 shadow-lg cursor-pointer font-bold"
-                >
-                  <Bot className="w-3.5 h-3.5" /> {isLoading ? 'Running Forensic Audit...' : 'Generate AI Report'}
-                </button>
-                {report && (
-                  <button
-                    type="button"
-                    onClick={handleDownloadPdf}
-                    disabled={isLoading}
-                    className="bf-pill-btn text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-40 shadow-lg cursor-pointer font-semibold"
-                    title="Download full business forensic report as PDF"
-                  >
-                    <Download className="w-3.5 h-3.5" /> Download PDF
-                  </button>
-                )}
-              </div>
-            </div>
-            <p className="text-[11px] text-neutral-400">
-              {isReal ? (
-                <span className="flex items-center gap-1 text-emerald-400 font-mono">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Honest retail commercial baseline · Verified OpenStreetMap entity
-                </span>
-              ) : (
-                <>
-                  Rule-based drift score: <span className="font-mono text-white">{selectedSim?.riskScore}/100</span> ·
-                  baseline source: <span className="font-mono">{selectedSim?.baseline.source}</span>
-                </>
-              )}
-            </p>
-          </div>
-        )}
 
-        {report ? (
-          <div className="space-y-4">
-            <div className="bf-card rounded-2xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="bf-kicker">[ EXECUTIVE SUMMARY ]</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 font-bold">
-                  {report.driftVerdict.split('_').join(' ')}
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <span className="bf-kicker flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-300" /> [ FORENSIC EVIDENCE & DRIFT FACTORS ]
                 </span>
-              </div>
-              <p className="text-sm text-neutral-200 leading-relaxed">{report.executiveSummary}</p>
-              <p className="text-[10px] font-mono text-neutral-500">
-                {report.merchantId} · confidence {report.confidenceScore}/100 · verified behavioural model
-              </p>
-            </div>
-
-            <div className="bf-card rounded-2xl p-5 space-y-3">
-              <span className="bf-kicker flex items-center gap-1.5">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-300" /> [ FORENSIC EVIDENCE & DRIFT FACTORS ]
-              </span>
-              <div className="space-y-2">
-                {report.evidenceItems.map((item, index) => (
-                  <div key={index} className={`p-3 rounded-xl border ${severityClasses[item.severity] ?? severityClasses.LOW}`}>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold">{item.title}</span>
-                      <span className="text-[9px] font-mono uppercase font-bold">{item.severity}</span>
+                <div className="space-y-2">
+                  {report.evidenceItems.map((item, index) => (
+                    <div key={index} className={`p-3 rounded-xl border ${severityClasses[item.severity] ?? severityClasses.LOW}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold">{item.title}</span>
+                        <span className="text-[9px] font-mono uppercase font-bold">{item.severity}</span>
+                      </div>
+                      <p className="text-[11px] mt-1 leading-relaxed opacity-90">{item.description}</p>
                     </div>
-                    <p className="text-[11px] mt-1 leading-relaxed opacity-90">{item.description}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="bf-card rounded-2xl p-5 space-y-3">
-              <span className="bf-kicker flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5" /> [ REGULATORY DOSSIER & NEXT STEPS ]
-              </span>
-              <p className="text-xs text-neutral-300 leading-relaxed">{report.regulatoryDossier.narrative}</p>
-              {report.regulatoryDossier.statutoryViolations.length > 0 && (
-                <ul className="text-[11px] text-neutral-400 list-disc pl-4 space-y-0.5">
-                  {report.regulatoryDossier.statutoryViolations.map((item, index) => (
-                    <li key={index}>{item}</li>
+              <div className="bf-card rounded-2xl p-5 space-y-3">
+                <span className="bf-kicker flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> [ REGULATORY DOSSIER & NEXT STEPS ]
+                </span>
+                <p className="text-xs text-neutral-300 leading-relaxed">{report.regulatoryDossier.narrative}</p>
+                {report.regulatoryDossier.statutoryViolations.length > 0 && (
+                  <ul className="text-[11px] text-neutral-400 list-disc pl-4 space-y-0.5">
+                    {report.regulatoryDossier.statutoryViolations.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                <ul className="text-[11px] text-neutral-200 space-y-1">
+                  {report.actionableRemediations.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <Sparkles className="w-3 h-3 mt-0.5 text-emerald-400 shrink-0" />
+                      <span>{item}</span>
+                    </li>
                   ))}
                 </ul>
-              )}
-              <ul className="text-[11px] text-neutral-200 space-y-1">
-                {report.actionableRemediations.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <Sparkles className="w-3 h-3 mt-0.5 text-emerald-400 shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : (
-          <div className="bf-card rounded-2xl p-12 text-center text-neutral-500 text-xs font-mono">
-            {isLoading ? 'Generating forensic AI investigation report...' : 'Select a merchant or shop above and click "Generate AI Report" to view findings.'}
-          </div>
-        )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`empty-${selectedMerchantId}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="bf-card rounded-2xl p-12 text-center text-neutral-500 text-xs font-mono"
+            >
+              Select a merchant or shop above and click "Generate AI Report" to view findings.
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
