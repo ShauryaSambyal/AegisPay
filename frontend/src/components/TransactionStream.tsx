@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SplitTextMask } from './motion/SplitTextMask';
 import {
   Calendar,
   CheckCircle2,
@@ -164,9 +165,10 @@ export const TransactionStream: React.FC<TransactionStreamProps> = ({
                 <MapPin className="w-3 h-3 shrink-0" /> OPENSTREETMAP BUSINESS TELEMETRY
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-              Live Payment Stream & Scenario Telemetry
-            </h1>
+            <SplitTextMask
+              text="Live Payment Stream & Scenario Telemetry"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            />
             <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
               Every payment monitors real businesses catalogued from OpenStreetMap with telemetry simulating behavioral
               drift and anomaly scenarios. Use the scenario triggers to inject real-time match outbursts, festive rushes, or

@@ -1,4 +1,5 @@
 import React from 'react';
+import { SplitTextMask } from './motion/SplitTextMask';
 import { 
   X, 
   ShieldCheck, 
@@ -67,9 +68,10 @@ export const PlatformOverviewModal: React.FC<PlatformOverviewModalProps> = ({
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>FOLLOW THE MONEY INNOVATION CHALLENGE &bull; IIM BANGALORE &times; PAYU</span>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-3">
-                Autonomous Behavioral Sentinel for Payment Aggregators
-              </h1>
+              <SplitTextMask
+                text="Autonomous Behavioral Sentinel for Payment Aggregators"
+                className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-3"
+              />
               <p className="text-sm sm:text-base text-neutral-300 leading-relaxed">
                 AegisPay Sentinel solves the payment industry&rsquo;s toughest fraud challenge:
                 <strong className="text-white"> &ldquo;The Bakery That Takes Bets&rdquo;</strong>.

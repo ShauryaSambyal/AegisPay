@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SplitTextMask } from './motion/SplitTextMask';
 import {
   Key,
   Copy,
@@ -146,9 +147,11 @@ VITE_API_URL=http://localhost:5000
           <Key className="w-3.5 h-3.5 text-emerald-400" />
           Settings Guide &bull; Simple Setup
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
-          API Setup &amp; Settings
-        </h2>
+        <SplitTextMask
+          text="API Setup & Settings"
+          as="h2"
+          className="text-xl sm:text-2xl font-bold text-white"
+        />
         <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
           The shop data comes from <strong className="text-white">OpenStreetMap via the Overpass API</strong>, which is
           free and key-less. Gemini and PayU are optional. Here is exactly what goes into{' '}

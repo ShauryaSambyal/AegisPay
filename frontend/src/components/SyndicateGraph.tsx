@@ -5,6 +5,7 @@ import { SimulatedMerchant, SyndicateGraphType, SyndicateNode } from '../types';
 import { SpotlightCard } from './reactbits/SpotlightCard';
 import { DecryptedText } from './reactbits/DecryptedText';
 import { CountUp } from './reactbits/CountUp';
+import { SplitTextMask } from './motion/SplitTextMask';
 
 interface SyndicateGraphProps {
   graphData: SyndicateGraphType | null;
@@ -123,9 +124,10 @@ export const SyndicateGraph: React.FC<SyndicateGraphProps> = ({
                 <FlaskConical className="w-3 h-3" /> SIM-ONLY NODES
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-              Simulated syndicate topology.
-            </h1>
+            <SplitTextMask
+              text="Simulated syndicate topology."
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            />
             <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
               {merchantCount} <span className="font-mono">SIM-*</span> merchants,{' '}
               {graphData.nodes.filter(n => n.type === 'PAYER_CLUSTER').length} payer clusters, one simulated hub and one

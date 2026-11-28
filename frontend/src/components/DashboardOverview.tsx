@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertTriangle, ArrowRight, Clock, Database, FlaskConical, Layers, ShieldCheck, Zap } from 'lucide-react';
 import { MlModelInfo, RealMerchant, SimulatedMerchant, Transaction } from '../types';
 import { getMerchantImage, REAL_OSM_BADGE, tierClasses, tierLabel } from '../merchantVisuals';
+import { SplitTextMask } from './motion/SplitTextMask';
 
 interface DashboardOverviewProps {
   realMerchants: RealMerchant[];
@@ -47,9 +48,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <FlaskConical className="w-3 h-3" /> SYNTHETIC DATA
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-              Merchant purpose drift on synthetic data.
-            </h1>
+            <SplitTextMask
+              text="Merchant purpose drift on synthetic data."
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            />
             <p className="text-sm sm:text-base text-neutral-400 leading-relaxed max-w-2xl pt-1">
               Every risk score, transaction and syndicate edge on this dashboard belongs to an anonymized
               <span className="font-mono text-neutral-200"> SIM-* </span>

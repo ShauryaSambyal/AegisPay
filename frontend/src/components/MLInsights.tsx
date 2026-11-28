@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { SplitTextMask } from './motion/SplitTextMask';
 import {
   AlertOctagon,
   AlertTriangle,
@@ -561,9 +562,10 @@ export const MLInsights: React.FC<MLInsightsProps> = ({
                 {mlOnline ? 'MODEL ONLINE & ACTIVE' : 'LIVE CALIBRATED INFERENCE ACTIVE'}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-              Predict Betting Syndicate & Platform Outcomes
-            </h1>
+            <SplitTextMask
+              text="Predict Betting Syndicate & Platform Outcomes"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            />
             <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
               Input any business suspected of investing on betting platforms or fronting syndicate flows. The calibrated
               gradient-boosted decision tree model analyzes operational drift, transaction patterns, and graph connections to

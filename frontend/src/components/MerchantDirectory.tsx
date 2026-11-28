@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Search, ShieldCheck, Sliders, MapPin } from 'lucide-react';
 import { RealMerchant, RiskTier, SimulatedMerchant } from '../types';
 import { getMerchantImage, REAL_OSM_BADGE, SIMULATED_BADGE, tierClasses, tierLabel } from '../merchantVisuals';
+import { SplitTextMask } from './motion/SplitTextMask';
 
 interface MerchantDirectoryProps {
   realMerchants: RealMerchant[];
@@ -57,9 +58,10 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
           <div className="max-w-3xl space-y-3">
             <span className="bf-kicker text-neutral-400">[ 04 / DIRECTORY &amp; CONTROLS ]</span>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-              Two datasets, never mixed.
-            </h1>
+            <SplitTextMask
+              text="Two datasets, never mixed."
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            />
             <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
               Real OpenStreetMap identities are display-only. Simulated <span className="font-mono">SIM-*</span> merchants
               carry the synthetic risk layer and the intervention controls. A risk value never appears on the real tab.

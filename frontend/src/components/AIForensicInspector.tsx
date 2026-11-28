@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AIInvestigationReport, RealMerchant, SimulatedMerchant, SyndicateGraphType, Transaction } from '../types';
 import { tierClasses, tierLabel } from '../merchantVisuals';
 import { generateInvestigationPdf } from '../utils/generateInvestigationPdf';
+import { SplitTextMask } from './motion/SplitTextMask';
 
 interface AIForensicInspectorProps {
   simulatedMerchants: SimulatedMerchant[];
@@ -149,9 +150,10 @@ export const AIForensicInspector: React.FC<AIForensicInspectorProps> = ({
               {isReal ? 'OPENSTREETMAP COMMERCIAL SHOP' : 'SIMULATED NETWORK MERCHANT'}
             </span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]">
-            Forensic AI Audit & Investigation
-          </h1>
+          <SplitTextMask
+            text="Forensic AI Audit & Investigation"
+            className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+          />
           <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
             Select any monitored simulated merchant or real OpenStreetMap commercial business to generate a comprehensive
             AI forensic analysis evaluating operational drift, payment velocity, statutory compliance, and regulatory risk.
