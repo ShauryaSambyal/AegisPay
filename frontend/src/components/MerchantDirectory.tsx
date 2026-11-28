@@ -3,6 +3,7 @@ import { Search, ShieldCheck, Sliders, MapPin } from 'lucide-react';
 import { RealMerchant, RiskTier, SimulatedMerchant } from '../types';
 import { getMerchantImage, REAL_OSM_BADGE, SIMULATED_BADGE, tierClasses, tierLabel } from '../merchantVisuals';
 import { SplitTextMask } from './motion/SplitTextMask';
+import { CoverflowCarousel } from './motion/CoverflowCarousel';
 
 interface MerchantDirectoryProps {
   realMerchants: RealMerchant[];
@@ -115,11 +116,27 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {realFiltered.map(merchant => (
-              <div key={merchant.id} className="bf-card rounded-2xl overflow-hidden border border-white/[0.08]">
-                <div className="relative h-32">
-                  <img src={getMerchantImage(merchant)} alt={merchant.name} className="w-full h-full object-cover brightness-[0.7]" />
+          <CoverflowCarousel
+            items={realFiltered}
+            getKey={merchant => merchant.id}
+            cardWidthClassName="w-[300px] sm:w-[370px] md:w-[420px]"
+            stageHeightClassName="min-h-[340px] sm:min-h-[360px]"
+            emptyMessage="No real OSM shops match this filter."
+            renderItem={(merchant, isActive) => (
+              <div
+                className={`bf-card rounded-2xl overflow-hidden border transition-colors ${
+                  isActive
+                    ? 'border-white/25 shadow-[0_24px_60px_rgba(0,0,0,0.75)] bg-[#0c0c10]'
+                    : 'border-white/[0.08] bg-[#09090d]'
+                }`}
+              >
+                <div className="relative h-40">
+                  <img
+                    src={getMerchantImage(merchant)}
+                    alt={merchant.name}
+                    draggable={false}
+                    className="w-full h-full object-cover brightness-[0.75]"
+                  />
                   <span className="absolute top-3 left-3 text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-200">
                     {REAL_OSM_BADGE}
                   </span>
@@ -127,9 +144,9 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                     {merchant.osmType}/{merchant.osmId}
                   </span>
                 </div>
-                <div className="p-4 space-y-2">
+                <div className="p-5 space-y-2.5">
                   <div>
-                    <h3 className="text-sm font-bold text-white truncate">{merchant.name}</h3>
+                    <h3 className="text-base font-bold text-white truncate">{merchant.name}</h3>
                     <p className="text-[11px] font-mono text-neutral-400">{merchant.categoryLabel}</p>
                   </div>
                   <p className="text-[11px] text-neutral-400 flex items-start gap-1.5">
@@ -141,16 +158,13 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                       </span>
                     </span>
                   </p>
-                  <div className="text-[10px] font-mono text-neutral-500 flex items-center gap-1">
+                  <div className="text-[10px] font-mono text-neutral-500 flex items-center gap-1 pt-1">
                     <ShieldCheck className="w-3 h-3 text-emerald-400" /> No risk data attached
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-          {realFiltered.length === 0 && (
-            <p className="text-xs text-neutral-500 font-mono">No real OSM shops match this filter.</p>
-          )}
+            )}
+          />
         </>
       ) : (
         <>
@@ -172,9 +186,20 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
             ))}
           </div>
 
-          <div className="space-y-3">
-            {simulatedFiltered.map(merchant => (
-              <div key={merchant.id} className="bf-card rounded-2xl p-5 border border-white/[0.08] space-y-4">
+          <CoverflowCarousel
+            items={simulatedFiltered}
+            getKey={merchant => merchant.id}
+            cardWidthClassName="w-[310px] sm:w-[540px] md:w-[660px]"
+            stageHeightClassName="min-h-[540px] sm:min-h-[470px]"
+            emptyMessage="No SIM merchants match this filter."
+            renderItem={(merchant, isActive) => (
+              <div
+                className={`bf-card rounded-2xl p-5 border space-y-4 transition-colors ${
+                  isActive
+                    ? 'border-white/25 shadow-[0_24px_60px_rgba(0,0,0,0.75)] bg-[#0c0c10]'
+                    : 'border-white/[0.08] bg-[#09090d]'
+                }`}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -232,7 +257,10 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                   ))}
                 </div>
 
-                <div className="p-4 rounded-xl bg-neutral-950 border border-white/[0.08] space-y-3">
+                <div
+                  onPointerDown={event => event.stopPropagation()}
+                  className="p-4 rounded-xl bg-neutral-950 border border-white/[0.08] space-y-3"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Sliders className="w-3.5 h-3.5 text-emerald-400" /> Simulated intervention controls
@@ -284,11 +312,8 @@ export const MerchantDirectory: React.FC<MerchantDirectoryProps> = ({
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-          {simulatedFiltered.length === 0 && (
-            <p className="text-xs text-neutral-500 font-mono">No SIM merchants match this filter.</p>
-          )}
+            )}
+          />
         </>
       )}
     </div>
